@@ -2647,34 +2647,34 @@ CStringA CSimpleTextSubtitle::GetStrA(int i, bool fSSA)
 
 CStringW CSimpleTextSubtitle::GetStrW(int i, bool fSSA)
 {
-    bool fUnicode = IsEntryUnicode(i);
+    STSEntry const& stse = m_entries.GetAt(i);
     int CharSet = GetCharSet(i);
 
-    CStringW str = m_entries.GetAt(i).str;
+    CStringW str = stse.str;
 
-    if(!fUnicode)
+    if(!stse.fUnicode)
         str = MBCSSSAToUnicode(str, CharSet);
 
     if(!fSSA)
-        str = RemoveSSATags(str, fUnicode, CharSet);
+        str = RemoveSSATags(str, true, CharSet);
 
-    return(str);
+    return str;
 }
 
 CStringW CSimpleTextSubtitle::GetStrWA(int i, bool fSSA)
 {
-    bool fUnicode = IsEntryUnicode(i);
+    STSEntry const& stse = m_entries.GetAt(i);
     int CharSet = GetCharSet(i);
 
-    CStringW str = m_entries.GetAt(i).str;
+    CStringW str = stse.str;
 
-    if(fUnicode)
+    if(stse.fUnicode)
         str = UnicodeSSAToMBCS(str, CharSet);
 
     if(!fSSA)
-        str = RemoveSSATags(str, fUnicode, CharSet);
+        str = RemoveSSATags(str, false, CharSet);
 
-    return(str);
+    return str;
 }
 
 void CSimpleTextSubtitle::SetStr(int i, CStringA str, bool fUnicode)
