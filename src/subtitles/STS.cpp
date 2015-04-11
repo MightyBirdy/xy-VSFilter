@@ -508,15 +508,15 @@ static CStringW SubRipper2SSA(CStringW str, int CharSet)
 
 static bool OpenSubRipper(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet)
 {
-    int num = 0;
-
     CStringW buff;
-    while(file->ReadString(buff))
-    {
+    while (file->ReadString(buff)) {
         buff.Trim();
-        if(buff.IsEmpty()) continue;
+        if(buff.IsEmpty()) {
+			continue;
+		}
 
         WCHAR sep;
+		int num = 0; // This one isn't really used just assigned a new value
         int hh1, mm1, ss1, ms1, hh2, mm2, ss2, ms2;
         int c = swscanf(buff, L"%d%c%d%c%d%c%d --> %d%c%d%c%d%c%d\n",
             &hh1, &sep, &mm1, &sep, &ss1, &sep, &ms1,
