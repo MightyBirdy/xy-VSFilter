@@ -67,3 +67,29 @@ extern CAtlList<CString>& MakeLower(CAtlList<CString>& sl);
 extern CAtlList<CString>& MakeUpper(CAtlList<CString>& sl);
 extern CAtlList<CString>& RemoveStrings(CAtlList<CString>& sl, int minlen, int maxlen);
 
+template<class T>
+T& FastTrimRight(T& str)
+{
+    if (!str.IsEmpty()) {
+        T::PCXSTR szStart = str;
+        T::PCXSTR szEnd   = szStart + str.GetLength() - 1;
+        T::PCXSTR szCur   = szEnd;
+        for (; szCur >= szStart; szCur--) {
+            if (!T::StrTraits::IsSpace(*szCur)) {
+                break;
+            }
+        }
+
+        if (szCur != szEnd) {
+            str.Truncate(int(szCur - szStart + 1));
+        }
+    }
+
+    return str;
+}
+
+template<class T>
+T& FastTrim(T& str)
+{
+    return FastTrimRight(str).TrimLeft();
+}
