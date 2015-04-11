@@ -3203,7 +3203,7 @@ void STSStyle::SetDefault()
     relativeTo = 2;
 }
 
-bool STSStyle::operator == (const STSStyle& s)const
+bool STSStyle::operator == (const STSStyle& s) const
 {
     return(marginRect == s.marginRect
         && scrAlignment == s.scrAlignment
