@@ -23,6 +23,8 @@
 
 #include <afx.h>
 
+#include "StdioFile64.h"
+
 class CTextFile : protected CStdioFile
 {
 public:

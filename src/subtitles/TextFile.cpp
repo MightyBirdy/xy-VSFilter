@@ -142,12 +142,12 @@ CString CTextFile::GetFilePath() const
 
 ULONGLONG CTextFile::GetPosition() const
 {
-	return(CStdioFile::GetPosition() - m_offset);
+	return(__super::GetPosition() - m_offset);
 }
 
 ULONGLONG CTextFile::GetLength() const
 {
-	return(CStdioFile::GetLength() - m_offset);
+	return(__super::GetLength() - m_offset);
 }
 
 ULONGLONG CTextFile::Seek(LONGLONG lOff, UINT nFrom)
@@ -163,11 +163,11 @@ ULONGLONG CTextFile::Seek(LONGLONG lOff, UINT nFrom)
 	case end: lOff = len - lOff; break;
 	}
 
-    lOff = max(min((ULONGLONG)lOff, len), 0) + m_offset;
+    lOff = max((LONGLONG)min((ULONGLONG)lOff, len), 0ll) + m_offset;
 
-	pos = CStdioFile::Seek(lOff, begin) - m_offset;
+	pos = __super::Seek(lOff, begin) - m_offset;
 
-	return(pos);
+	return pos;
 }
 
 void CTextFile::WriteString(LPCSTR lpsz/*CStringA str*/)
