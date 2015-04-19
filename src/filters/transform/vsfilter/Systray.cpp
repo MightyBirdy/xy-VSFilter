@@ -58,6 +58,16 @@ LRESULT CALLBACK HookProc(UINT code, WPARAM wParam, LPARAM lParam)
 	return CallNextHookEx(g_hHook, code,  wParam, lParam);
 } 
 
+static BOOL CALLBACK enumWindowCallback(HWND hwnd, LPARAM lparam)
+{
+    HWND owner = (HWND)lparam;
+    if (owner == GetWindow(hwnd, GW_OWNER)) {
+        SetForegroundWindow(hwnd);
+        return FALSE;
+    }
+    return TRUE;
+}
+
 class CSystrayWindow : public CWnd
 {
 	SystrayIconData* m_tbid;
