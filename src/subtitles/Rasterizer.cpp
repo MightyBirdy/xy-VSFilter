@@ -1593,20 +1593,24 @@ void OverlapRegion(tSpanBuffer& dst, const tSpanBuffer& src, int dx, int dy)
             // B spans don't overlap, so begin merge loop with A first.
             for(;;)
             {
-                // If we run out of A spans or the A span doesn't overlap,
-                // then the next B span can't either (because B spans don't
-                // overlap) and we exit.
-                if(itA == itAE || (*itA).first > x2)
-                    break;
-                do {x2 = _MAX(x2, (*itA++).second);}
-                while(itA != itAE && (*itA).first <= x2);
+				while (itA != itAE && (*itA).first <= x2) {
+                    x2 = _MAX(x2, (*itA).second);
+                    ++itA;
+                }
+
                 // If we run out of B spans or the B span doesn't overlap,
                 // then the next A span can't either (because A spans don't
                 // overlap) and we exit.
                 if(itB == itBE || (*itB).first + offset1 > x2)
                     break;
-                do {x2 = _MAX(x2, (*itB++).second + offset2);}
+                do {x2 = _MAX(x2, (*itB).second + offset2); ++itB;}
                 while(itB != itBE && (*itB).first + offset1 <= x2);
+                // If we run out of A spans or the A span doesn't overlap,
+                // then the next B span can't either (because B spans don't
+                // overlap) and we exit.
+
+                if (itA == itAE || (*itA).first > x2)
+                    break;
             }
             // Flush span.
             dst.push_back(tSpan(x1, x2));
@@ -1620,20 +1624,23 @@ void OverlapRegion(tSpanBuffer& dst, const tSpanBuffer& src, int dx, int dy)
             // A spans don't overlap, so begin merge loop with B first.
             for(;;)
             {
-                // If we run out of B spans or the B span doesn't overlap,
-                // then the next A span can't either (because A spans don't
-                // overlap) and we exit.
-                if(itB == itBE || (*itB).first + offset1 > x2)
-                    break;
-                do {x2 = _MAX(x2, (*itB++).second + offset2);}
-                while(itB != itBE && (*itB).first + offset1 <= x2);
+				while (itB != itBE && (*itB).first + offset1 <= x2) {
+                    x2 = _MAX(x2, (*itB).second + offset2);
+                    ++itB;
+                }
+
                 // If we run out of A spans or the A span doesn't overlap,
                 // then the next B span can't either (because B spans don't
                 // overlap) and we exit.
                 if(itA == itAE || (*itA).first > x2)
                     break;
-                do {x2 = _MAX(x2, (*itA++).second);}
+                do {x2 = _MAX(x2, (*itA).second); ++itA;}
                 while(itA != itAE && (*itA).first <= x2);
+				// If we run out of B spans or the B span doesn't overlap,
+                // then the next A span can't either (because A spans don't
+                // overlap) and we exit.
+                if(itB == itBE || (*itB).first + offset1 > x2)
+                    break;
             }
             // Flush span.
             dst.push_back(tSpan(x1, x2));
@@ -1641,11 +1648,18 @@ void OverlapRegion(tSpanBuffer& dst, const tSpanBuffer& src, int dx, int dy)
     }
     // Copy over leftover spans.
     while(itA != itAE)
-        dst.push_back(*itA++);
+        dst.push_back(*itA);
+        ++itA;
     while(itB != itBE)
     {
-        dst.push_back(tSpan((*itB).first + offset1, (*itB).second + offset2));
+        unsigned __int64 x1 = (*itB).first + offset1;
+        unsigned __int64 x2 = (*itB).second + offset2;
         ++itB;
+		while (itB != itBE && (*itB).first + offset1 <= x2) {
+            x2 = _MAX(x2, (*itB).second + offset2);
+            ++itB;
+        }
+        dst.push_back(tSpan(x1, x2));
     }
 }
 
@@ -2759,7 +2773,7 @@ ScanLineData::~ScanLineData()
 {    
 }
 
-void ScanLineData::_ReallocEdgeBuffer(int edges)
+void ScanLineData::_ReallocEdgeBuffer(unsigned edges)
 {
     mEdgeHeapSize = edges;
     mpEdgeBuffer = (Edge*)realloc(mpEdgeBuffer, sizeof(Edge)*edges);
@@ -2859,54 +2873,51 @@ void ScanLineData::_EvaluateLine(int x0, int y0, int x1, int y1)
     if(!fFirstSet) {firstp.x = x0; firstp.y = y0; fFirstSet = true;}
     lastp.x = x1;
     lastp.y = y1;
-    if(y1 > y0)	// down
-    {
-        __int64 xacc = (__int64)x0 << 13;
-        // prestep y0 down
-        int dy = y1 - y0;
-        int y = ((y0 + 3)&~7) + 4;
-        int iy = y >> 3;
-        y1 = (y1 - 5) >> 3;
-        if(iy <= y1)
-        {
-            __int64 invslope = (__int64(x1 - x0) << 16) / dy;
-            while(mEdgeNext + y1 + 1 - iy > mEdgeHeapSize)
-                _ReallocEdgeBuffer(mEdgeHeapSize*2);
-            xacc += (invslope * (y - y0)) >> 3;
-            while(iy <= y1)
-            {
-                int ix = (int)((xacc + 32768) >> 16);
-                mpEdgeBuffer[mEdgeNext].next = mpScanBuffer[iy];
-                mpEdgeBuffer[mEdgeNext].posandflag = ix*2 + 1;
-                mpScanBuffer[iy] = mEdgeNext++;
-                ++iy;
-                xacc += invslope;
-            }
-        }
+
+	if (y1 > y0) {
+        _EvaluateLine<LINE_UP>(x0, y0, x1, y1);
+    } else if (y1 < y0) {
+        _EvaluateLine<LINE_DOWN>(x1, y1, x0, y0);
     }
-    else if(y1 < y0) // up
-    {
-        __int64 xacc = (__int64)x1 << 13;
-        // prestep y1 down
-        int dy = y0 - y1;
-        int y = ((y1 + 3)&~7) + 4;
-        int iy = y >> 3;
-        y0 = (y0 - 5) >> 3;
-        if(iy <= y0)
-        {
-            __int64 invslope = (__int64(x0 - x1) << 16) / dy;
-            while(mEdgeNext + y0 + 1 - iy > mEdgeHeapSize)
-                _ReallocEdgeBuffer(mEdgeHeapSize*2);
-            xacc += (invslope * (y - y1)) >> 3;
-            while(iy <= y0)
-            {
-                int ix = (int)((xacc + 32768) >> 16);
-                mpEdgeBuffer[mEdgeNext].next = mpScanBuffer[iy];
-                mpEdgeBuffer[mEdgeNext].posandflag = ix*2;
-                mpScanBuffer[iy] = mEdgeNext++;
-                ++iy;
-                xacc += invslope;
-            }
+}
+
+template<int flag>
+void ScanLineData::_EvaluateLine(int x0, int y0, int x1, int y1)
+{
+    __int64 xacc = (__int64)x0 << 13;
+
+    // prestep
+
+    int dy = y1 - y0;
+    int y = ((y0 + 3) & ~7) + 4;
+    int iy = y >> 3;
+
+    y1 = (y1 - 5) >> 3;
+
+    if (iy <= y1) {
+        __int64 invslope = (__int64(x1 - x0) << 16) / dy;
+
+        if (mEdgeNext + y1 + 1 - iy > mEdgeHeapSize) {
+            unsigned int new_edge_heap_size = mEdgeHeapSize * 2;
+            while (mEdgeNext + y1 + 1 - iy > new_edge_heap_size) {
+                new_edge_heap_size *= 2;
+             }
+            _ReallocEdgeBuffer(new_edge_heap_size);
+        }
+
+        xacc += (invslope * (y - y0)) >> 3;
+
+        while (iy <= y1) {
+            int ix = (int)((xacc + 32768) >> 16);
+
+            mpEdgeBuffer[mEdgeNext].next = mpScanBuffer[iy];
+            mpEdgeBuffer[mEdgeNext].posandflag = (ix << 1) | flag;
+
+            mpScanBuffer[iy] = mEdgeNext++;
+
+            ++iy;
+            xacc += invslope;
+
         }
     }
 }
