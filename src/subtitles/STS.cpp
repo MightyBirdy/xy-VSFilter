@@ -560,7 +560,7 @@ static bool OpenSubRipper(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet
         }
     }
 
-    return(!ret.IsEmpty());
+    return !ret.IsEmpty();
 }
 
 static bool OpenOldSubRipper(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet)
@@ -578,7 +578,7 @@ static bool OpenOldSubRipper(CTextFile* file, CSimpleTextSubtitle& ret, int Char
         }
 
         int hh1, mm1, ss1, hh2, mm2, ss2;
-        int c = swscanf(buff, L"{%d:%d:%d}{%d:%d:%d}", &hh1, &mm1, &ss1, &hh2, &mm2, &ss2);
+        int c = swscanf_s(buff, L"{%d:%d:%d}{%d:%d:%d}", &hh1, &mm1, &ss1, &hh2, &mm2, &ss2);
 
         if(c == 6)
         {
@@ -594,7 +594,7 @@ static bool OpenOldSubRipper(CTextFile* file, CSimpleTextSubtitle& ret, int Char
         }
     }
 
-    return(!ret.IsEmpty());
+    return !ret.IsEmpty();
 }
 
 static bool OpenSubViewer(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet)
@@ -657,13 +657,13 @@ static bool OpenSubViewer(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet
 
         WCHAR sep;
         int hh1, mm1, ss1, hs1, hh2, mm2, ss2, hs2;
-        int c = swscanf(buff, L"%d:%d:%d%c%d,%d:%d:%d%c%d\n",
-            &hh1, &mm1, &ss1, &sep, &hs1, &hh2, &mm2, &ss2, &sep, &hs2);
+        int c = swscanf_s(buff, L"%d:%d:%d%c%d,%d:%d:%d%c%d\n",
+            &hh1, &mm1, &ss1, &sep, 1, &hs1, &hh2, &mm2, &ss2, &sep, 1, &hs2);
 
         if(c == 10)
         {
             CStringW str;
-            file->ReadString(str);
+            VERIFY(file->ReadString(str));
 
             str.Replace(L"[br]", L"\\N");
 
@@ -688,7 +688,7 @@ static bool OpenSubViewer(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet
         }
     }
 
-    return(!ret.IsEmpty());
+    return !ret.IsEmpty();
 }
 
 static STSStyle* GetMicroDVDStyle(CString str, int CharSet)
@@ -711,7 +711,7 @@ static STSStyle* GetMicroDVDStyle(CString str, int CharSet)
 
         if(!_tcsnicmp(code, _T("{c:$"), 4))
         {
-            _stscanf(code, _T("{c:$%x"), &ret->colors[0]);
+            _stscanf_s(code, _T("{c:$%x"), &ret->colors[0]);
         }
         else if(!_tcsnicmp(code, _T("{f:"), 3))
         {
@@ -720,12 +720,12 @@ static STSStyle* GetMicroDVDStyle(CString str, int CharSet)
         else if(!_tcsnicmp(code, _T("{s:"), 3))
         {
             float f;
-            if(1 == _stscanf(code, _T("{s:%f"), &f))
+            if(1 == _stscanf_s(code, _T("{s:%f"), &f))
                 ret->fontSize = f;
         }
         else if(!_tcsnicmp(code, _T("{h:"), 3))
         {
-            _stscanf(code, _T("{h:%d"), &ret->charSet);
+            _stscanf_s(code, _T("{h:%d"), &ret->charSet);
         }
         else if(!_tcsnicmp(code, _T("{y:"), 3))
         {
@@ -738,7 +738,7 @@ static STSStyle* GetMicroDVDStyle(CString str, int CharSet)
         else if(!_tcsnicmp(code, _T("{p:"), 3))
         {
             int p;
-            _stscanf(code, _T("{p:%d"), &p);
+            _stscanf_s(code, _T("{p:%d"), &p);
             ret->scrAlignment = (p == 0) ? 8 : 2;
         }
 
@@ -784,7 +784,7 @@ static CStringW MicroDVD2SSA(CStringW str, bool fUnicode, int CharSet)
                     code.MakeLower();
 
                     int color;
-                    swscanf(code, L"{c:$%x", &color);
+                    swscanf_s(code, L"{c:$%x", &color);
                     code.Format(L"{\\c&H%x&}", color);
                     ret += code;
                 }
@@ -800,8 +800,8 @@ static CStringW MicroDVD2SSA(CStringW str, bool fUnicode, int CharSet)
                     fRestore[FONTSIZE] = (iswupper(code[1]) == 0);
                     code.MakeLower();
 
-                    float size;
-                    swscanf(code, L"{s:%f", &size);
+                    double size;
+                    swscanf_s(code, L"{s:%lf", &size);
                     code.Format(L"{\\fs%f}", size);
                     ret += code;
                 }
@@ -810,9 +810,9 @@ static CStringW MicroDVD2SSA(CStringW str, bool fUnicode, int CharSet)
                     fRestore[COLOR] = (_istupper(code[1]) == 0);
                     code.MakeLower();
 
-                    int CharSet;
-                    swscanf(code, L"{h:%d", &CharSet);
-                    code.Format(L"{\\fe%d}", CharSet);
+                    int iCharSet;
+                    swscanf_s(code, L"{h:%d", &iCharSet);
+                    code.Format(L"{\\fe%d}", iCharSet);
                     ret += code;
                 }
                 else if(!wcsnicmp(code, L"{y:", 3))
@@ -834,7 +834,7 @@ static CStringW MicroDVD2SSA(CStringW str, bool fUnicode, int CharSet)
 
                     int x, y;
                     TCHAR c;
-                    swscanf(code, L"{o:%d%c%d", &x, &c, &y);
+                    swscanf_s(code, L"{o:%d%c%d", &x, &c, 1, &y);
                     code.Format(L"{\\move(%d,%d,0,0,0,0)}", x, y);
                     ret += code;
                 }
@@ -865,7 +865,7 @@ static CStringW MicroDVD2SSA(CStringW str, bool fUnicode, int CharSet)
             }
         }
 
-        memset(fRestore, 0, sizeof(bool)*fRestoreLen);
+        ZeroMemory(fRestore, sizeof(bool)*fRestoreLen);
 
         ret += L"\\N";
     }
@@ -886,9 +886,9 @@ static bool OpenMicroDVD(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet)
         if(buff.IsEmpty()) continue;
 
         int start, end;
-        int c = swscanf(buff, L"{%d}{%d}", &start, &end);
+        int c = swscanf_s(buff, L"{%d}{%d}", &start, &end);
 
-        if(c != 2) {c = swscanf(buff, L"{%d}{}", &start)+1; end = start + 60; fCheck = true;}
+        if(c != 2) {c = swscanf_s(buff, L"{%d}{}", &start)+1; end = start + 60; fCheck = true;}
 
         if(c != 2)
         {
@@ -934,7 +934,7 @@ static bool OpenMicroDVD(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet)
         }
     }
 
-    return(!ret.IsEmpty());
+    return !ret.IsEmpty();
 }
 
 static void ReplaceNoCase(CStringW& str, CStringW from, CStringW to)
@@ -1173,7 +1173,7 @@ static bool OpenVPlayer(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet)
         }
 
         int hh, mm, ss;
-        int c = swscanf(buff, L"%d:%d:%d:", &hh, &mm, &ss);
+        int c = swscanf_s(buff, L"%d:%d:%d:", &hh, &mm, &ss);
 
         if(c == 3)
         {
@@ -1189,7 +1189,7 @@ static bool OpenVPlayer(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet)
         }
     }
 
-    return(!ret.IsEmpty());
+    return !ret.IsEmpty();
 }
 
 static inline CStringW GetStr(CStringW& buff, WCHAR sep = L',') //throw(...)
@@ -1304,7 +1304,7 @@ static bool LoadFont(CString& font)
 
     const TCHAR* s = font;
     const TCHAR* e = s + len;
-    for(BYTE* p = pData; s < e; s++, p++) *p = *s - 33;
+    for(BYTE* p = pData; s < e; s++, p++) *p = BYTE(*s - 33);
 
     for(int i = 0, j = 0, k = len&~3; i < k; i+=4, j+=3)
     {
@@ -1349,7 +1349,7 @@ static bool LoadFont(CString& font)
             chksum += ((DWORD*)(BYTE*)pData)[i];
 
         CString fn;
-        fn.Format(_T("%sfont%08x.ttf"), path, chksum);
+        fn.Format(_T("%sfont%08lx.ttf"), path, chksum);
 
         CFileStatus fs;
         if(!CFileGetStatus(fn, fs))
@@ -1795,7 +1795,7 @@ static bool OpenXombieSub(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet
         }
     }
 
-    return(!ret.IsEmpty());
+    return !ret.IsEmpty();
 }
 
 #include "USFSubtitles.h"
@@ -1857,7 +1857,7 @@ static bool OpenMPL2(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet)
         }
     }
 
-    return(!ret.IsEmpty());
+    return !ret.IsEmpty();
 }
 
 typedef bool (*STSOpenFunct)(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet);
@@ -2240,7 +2240,7 @@ void CSimpleTextSubtitle::AddStyle(CString name, STSStyle* style)
 
         CString name2 = name_str;
 
-        if(i < len && _stscanf(name_str.Right(len-i), _T("%d"), &idx) == 1)
+        if(i < len && _stscanf_s(name_str.Right(len-i), _T("%d"), &idx) == 1)
         {
             name2 = name_str.Left(i);
         }
@@ -3302,20 +3302,28 @@ STSStyle& operator <<= (STSStyle& s, const CString& style)
 
 static bool OpenRealText(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet)
 {
-    wstring szFile;
+    std::wstring szFile;
 
     CStringW buff;
     while(file->ReadString(buff))
     {
         FastTrim(buff);
-        if(buff.IsEmpty()) continue;
+        if (buff.IsEmpty()) {
+            continue;
+        }
 
-        szFile += CStringW(_T("\n")) + buff.GetBuffer();
+        // Make sure that the subtitle file starts with a <window> tag
+        if (szFile.empty() && buff.CompareNoCase(_T("<window")) < 0) {
+            return false;
+        }
+
+        szFile += _T("\n") + buff;
     }
 
     CRealTextParser RealTextParser;
-    if (!RealTextParser.ParseRealText(szFile))
+    if (!RealTextParser.ParseRealText(szFile)) {
         return false;
+	}
 
     CRealTextParser::Subtitles crRealText = RealTextParser.GetParsedSubtitles();
 
@@ -3333,5 +3341,5 @@ static bool OpenRealText(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet)
 //  std::wofstream wofsOut(L"c:/zzz.srt");
 //  RealTextParser.OutputSRT(wofsOut);
 
-    return(!ret.IsEmpty());
+    return !ret.IsEmpty();
 }
