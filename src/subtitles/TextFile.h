@@ -26,17 +26,17 @@
 class CTextFile : protected CStdioFile
 {
 public:
-	typedef enum {ASCII, UTF8, LE16, BE16, ANSI} enc;
+	typedef enum {DEFAULT_ENCODING, UTF8, LE16, BE16, ANSI} enc;
 
 private:
 	enc m_encoding, m_defaultencoding;
 	int m_offset;
 
 public:
-	CTextFile(enc e = ASCII);
+	CTextFile(enc e = DEFAULT_ENCODING);
 
 	virtual bool Open(LPCTSTR lpszFileName);
-	virtual bool Save(LPCTSTR lpszFileName, enc e /*= ASCII*/);
+	virtual bool Save(LPCTSTR lpszFileName, enc e /*= DEFAULT_ENCODING*/);
 
 	void SetEncoding(enc e);
 	enc GetEncoding();
@@ -67,10 +67,10 @@ class CWebTextFile : public CTextFile
 	CString m_tempfn;
 
 public:
-    CWebTextFile(CTextFile::enc e = ASCII, LONGLONG llMaxSize = 1024 * 1024);
+    CWebTextFile(CTextFile::enc e = DEFAULT_ENCODING, LONGLONG llMaxSize = 1024 * 1024);
 
 	bool Open(LPCTSTR lpszFileName);
-	bool Save(LPCTSTR lpszFileName, enc e /*= ASCII*/);
+	bool Save(LPCTSTR lpszFileName, enc e /*= DEFAULT_ENCODING*/);
 	void Close();
 };
 

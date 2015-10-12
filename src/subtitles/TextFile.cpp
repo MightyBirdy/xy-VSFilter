@@ -71,7 +71,7 @@ bool CTextFile::Open(LPCTSTR lpszFileName)
 		}
 	}
 
-    if (m_encoding == ASCII) {
+    if (m_encoding == DEFAULT_ENCODING) {
         if (!ReopenAsText()) {
             return false;
         }
@@ -91,7 +91,7 @@ bool CTextFile::ReopenAsText()
 
 bool CTextFile::Save(LPCTSTR lpszFileName, enc e)
 {
-	if(!__super::Open(lpszFileName, modeCreate|modeWrite|shareDenyWrite|(e==ASCII?typeText:typeBinary)))
+	if(!__super::Open(lpszFileName, modeCreate|modeWrite|shareDenyWrite|(e==DEFAULT_ENCODING?typeText:typeBinary)))
 		return(false);
 
 	if(e == UTF8)
@@ -174,7 +174,7 @@ void CTextFile::WriteString(LPCSTR lpsz/*CStringA str*/)
 {
 	CStringA str(lpsz);
 
-	if(m_encoding == ASCII)
+	if(m_encoding == DEFAULT_ENCODING)
 	{
 		__super::WriteString(AToT(str));
 	}
@@ -201,7 +201,7 @@ void CTextFile::WriteString(LPCWSTR lpsz/*CStringW str*/)
 {
 	CStringW str(lpsz);
 
-	if(m_encoding == ASCII)
+	if(m_encoding == DEFAULT_ENCODING)
 	{
 		__super::WriteString(WToT(str));
 	}
@@ -263,7 +263,7 @@ BOOL CTextFile::ReadString(CStringA& str)
 
 	str.Empty();
 
-    if(m_encoding == ASCII)
+    if(m_encoding == DEFAULT_ENCODING)
     {
         CString s;
         fEOF = !__super::ReadString(s);
@@ -353,7 +353,7 @@ BOOL CTextFile::ReadString(CStringA& str)
             else if (!m_offset)
             {
                 // Switch to text and read again
-                m_encoding = ASCII;
+                m_encoding = DEFAULT_ENCODING;
                 // Rewind to the end of the line and save the position
                 Seek(-nBytesRead, current);
                 ULONGLONG currentPosition = GetPosition();
@@ -408,7 +408,7 @@ BOOL CTextFile::ReadString(CStringW& str)
 
 	str.Empty();
 
-	if(m_encoding == ASCII)
+	if(m_encoding == DEFAULT_ENCODING)
 	{
 		CString s;
 		fEOF = !__super::ReadString(s);
@@ -508,7 +508,7 @@ BOOL CTextFile::ReadString(CStringW& str)
                 }
             } else if (!m_offset) {
                 // Switch to text and read again
-                m_encoding = ASCII;
+                m_encoding = DEFAULT_ENCODING;
                 // Rewind to the end of the line and save the position
                 Seek(-nBytesRead, current);
                 ULONGLONG currentPosition = GetPosition();
