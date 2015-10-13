@@ -3,7 +3,7 @@
 function Usage()
 {
   echo "Usage:"
-  echo -e "\t$1 [-conf "'"Release"|"Debug"'"]  [-plat platform "'"Win32"|"x64"'"] [-action build|clean|rebuild] [-proj projects] [-voff|--versioning-off] [-solution sln_file] [-compiler VS2010|VS2012|VS2013]"
+  echo -e "\t$1 [-conf "'"Release"|"Debug"'"]  [-plat platform "'"Win32"|"x64"'"] [-action build|clean|rebuild] [-proj projects] [-voff|--versioning-off] [-solution sln_file] [-compiler VS2010|VS2012|VS2013|VS2015]"
   echo -e "\nDefault:"
   echo -e '-conf\t\t"Release"'
   echo -e '-plat\t\t"Win32"'
@@ -15,6 +15,8 @@ function Usage()
   echo -e '-compiler\tVS2012'
   echo -e "\nVisual Studio 2013:"
   echo -e '-compiler\tVS2013'
+  echo -e "\nVisual Studio 2015:"
+  echo -e '-compiler\tVS2015'
 }
 
 script_dir=`dirname $0`
@@ -107,6 +109,8 @@ elif [ "$compiler"x == "vs2012"x ]; then
   common_tools="%VS110COMNTOOLS%"
 elif [ "$compiler"x == "vs2013"x ]; then
   common_tools="%VS120COMNTOOLS%"
+elif [ "$compiler"x == "vs2015"x ]; then
+  common_tools="%VS140COMNTOOLS%"
 else
   echo "Invalid compiler argument: $compiler"
   Usage $0
