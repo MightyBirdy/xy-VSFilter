@@ -1773,7 +1773,7 @@ static bool OpenXombieSub(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet
                 marginRect.right = GetInt(buff);
                 marginRect.top = marginRect.bottom = GetInt(buff);
 
-                Style.TrimLeft(_T'*');
+                Style.TrimLeft(_T('*'));
                 if(!Style.CompareNoCase(_T("Default"))) Style = _T("Default");
 
                 ret.Add(buff,
@@ -3327,9 +3327,7 @@ static bool OpenRealText(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet)
 
     CRealTextParser::Subtitles crRealText = RealTextParser.GetParsedSubtitles();
 
-    for (map<pair<int, int>, wstring>::const_iterator i = crRealText.m_mapLines.begin();
-         i != crRealText.m_mapLines.end();
-         ++i)
+    for (auto i = crRealText.m_mapLines.cbegin(); i != crRealText.m_mapLines.cend(); ++i) 
     {
         ret.Add(
             SubRipper2SSA(i->second.c_str(), CharSet),
