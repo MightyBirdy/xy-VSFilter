@@ -367,9 +367,9 @@ void CMediaTypeEx::Dump(CAtlList<CString>& sl)
 	sl.AddTail(str);
 	str.Format(_T("bTemporalCompression: %d"), bTemporalCompression);
 	sl.AddTail(str);
-	str.Format(_T("lSampleSize: %d"), lSampleSize);
+	str.Format(_T("lSampleSize: %lu"), lSampleSize);
 	sl.AddTail(str);
-	str.Format(_T("cbFormat: %d"), cbFormat);
+	str.Format(_T("cbFormat: %lu"), cbFormat);
 	sl.AddTail(str);
 
 	sl.AddTail(_T(""));
@@ -388,9 +388,9 @@ void CMediaTypeEx::Dump(CAtlList<CString>& sl)
 		BITMAPINFOHEADER* bih = &vih.bmiHeader;
 
 		sl.AddTail(_T("VIDEOINFOHEADER:"));
-		str.Format(_T("rcSource: (%d,%d)-(%d,%d)"), vih.rcSource);
+		str.Format(_T("rcSource: (%ld,%ld)-(%ld,%ld)"), vih.rcSource);
 		sl.AddTail(str);
-		str.Format(_T("rcTarget: (%d,%d)-(%d,%d)"), vih.rcTarget);
+		str.Format(_T("rcTarget: (%ld,%ld)-(%ld,%ld)"), vih.rcTarget);
 		sl.AddTail(str);
 		str.Format(_T("dwBitRate: %d"), vih.dwBitRate);
 		sl.AddTail(str);
@@ -457,9 +457,9 @@ void CMediaTypeEx::Dump(CAtlList<CString>& sl)
 		sl.AddTail(_T("BITMAPINFOHEADER:"));
 		str.Format(_T("biSize: %d"), bih->biSize);
 		sl.AddTail(str);
-		str.Format(_T("biWidth: %d"), bih->biWidth);
+		str.Format(_T("biWidth: %ld"), bih->biWidth);
 		sl.AddTail(str);
-		str.Format(_T("biHeight: %d"), bih->biHeight);
+		str.Format(_T("biHeight: %ld"), bih->biHeight);
 		sl.AddTail(str);
 		str.Format(_T("biPlanes: %d"), bih->biPlanes);
 		sl.AddTail(str);
@@ -470,9 +470,9 @@ void CMediaTypeEx::Dump(CAtlList<CString>& sl)
 		sl.AddTail(str);
 		str.Format(_T("biSizeImage: %d"), bih->biSizeImage);
 		sl.AddTail(str);
-		str.Format(_T("biXPelsPerMeter: %d"), bih->biXPelsPerMeter);
+		str.Format(_T("biXPelsPerMeter: %ld"), bih->biXPelsPerMeter);
 		sl.AddTail(str);
-		str.Format(_T("biYPelsPerMeter: %d"), bih->biYPelsPerMeter);
+		str.Format(_T("biYPelsPerMeter: %ld"), bih->biYPelsPerMeter);
 		sl.AddTail(str);
 		str.Format(_T("biClrUsed: %d"), bih->biClrUsed);
 		sl.AddTail(str);
@@ -611,21 +611,21 @@ void CMediaTypeEx::Dump(CAtlList<CString>& sl)
 		{
 			str.Format(_T("%04x:"), i);
 
-			for(int k = i, l = min(i + 16, cbFormat); k < l; k++)
+			for(ptrdiff_t k = i, l = min(i + 16, (int)cbFormat); k < l; k++)
 			{
 				CString byte;
 				byte.Format(_T("%c%02x"), fmtsize > 0 && fmtsize == k ? '|' : ' ', pbFormat[k]);
 				str += byte;
 			}
 
-			for(int k = min(i + 16, cbFormat), l = i + 16; k < l; k++)
+			for(ptrdiff_t k = min(i + 16, (int)cbFormat), l = i + 16; k < l; k++)
 			{
 				str += _T("   ");
 			}
 
 			str += ' ';
 
-			for(int k = i, l = min(i + 16, cbFormat); k < l; k++)
+			for(ptrdiff_t k = i, l = min(i + 16, (int)cbFormat); k < l; k++)
 			{
 				unsigned char c = (unsigned char)pbFormat[k];
 				CStringA ch;
