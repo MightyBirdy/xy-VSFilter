@@ -55,10 +55,13 @@ private:
 
 public:
 	int iLang, iIdx;
-	bool fForced;
+	bool fForced, bAnimated;
+	int tCurrent;
 	__int64 start, delay;
 	CRect rect;
-	typedef struct {BYTE pal:4, tr:4;} SubPal;
+	struct SubPal {
+        BYTE pal: 4, tr: 4;
+    };
 	SubPal pal[4];
 	RGBQUAD* lpPixels;
 
@@ -67,8 +70,8 @@ public:
 
 	void Invalidate() {iLang = iIdx = -1;}
 
-	void GetPacketInfo(BYTE* lpData, int packetsize, int datasize);
-	bool Decode(BYTE* lpData, int packetsize, int datasize,
+	void GetPacketInfo(const BYTE* lpData, int packetsize, int datasize, int t = INT_MAX);
+	bool Decode(BYTE* lpData, int packetsize, int datasize, int t,
 				bool fCustomPal, 
 				int tridx, 
 				RGBQUAD* orgpal /*[16]*/, RGBQUAD* cuspal /*[4]*/, 
