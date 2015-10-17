@@ -22,6 +22,7 @@
 #include "StdAfx.h"
 #include "usfsubtitles.h"
 #include <msxml.h>
+#include <algorithm>
 
 #define DeclareNameAndValue(pNode, name, val) \
     CComBSTR name; \
@@ -300,7 +301,7 @@ bool CUSFSubtitles::ConvertToSTS(CSimpleTextSubtitle& sts)
 			stss->colors[i] = color & 0xffffff;
 			stss->alpha[i] = (BYTE)(color>>24);
 
-			stss->alpha[i] = stss->alpha[i] + (255 - stss->alpha[i]) * min(max(alpha, 0), 100) / 100;
+			stss->alpha[i] = stss->alpha[i] + (255 - stss->alpha[i]) * std::min(std::max(alpha, 0), 100) / 100;
 		}
 
 		if(!s->fontstyle.face.IsEmpty()) stss->fontName = s->fontstyle.face;

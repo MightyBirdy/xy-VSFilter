@@ -35,7 +35,7 @@ namespace ssf
 		size_t m_limit;
 
 	public:
-		Cache(size_t limit) {m_limit = max(1, limit);}
+		Cache(size_t limit) {m_limit = std::max<size_t>(1, limit);}
 		virtual ~Cache() {RemoveAll();}
 
 		void RemoveAll()

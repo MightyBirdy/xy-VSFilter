@@ -20,9 +20,11 @@
  */
 
 #include "stdafx.h"
+#include "DX9SubPic.h"
 #include <d3d9.h>
 #include <vmr9.h>
-#include "DX9SubPic.h"
+#include <algorithm>
+
 
 //
 // CDX9SubPic
@@ -121,7 +123,7 @@ STDMETHODIMP CDX9SubPic::CopyTo(ISubPic* pSubPic)
 	pDstSurf->GetDesc(&dstDesc);
 
 	RECT r;
-	SetRect(&r, 0, 0, min(srcDesc.Width, dstDesc.Width), min(srcDesc.Height, dstDesc.Height));
+	SetRect(&r, 0, 0, std::min(srcDesc.Width, dstDesc.Width), std::min(srcDesc.Height, dstDesc.Height));
 	POINT p = { 0, 0 };
 	hr = pD3DDev->UpdateSurface(pSrcSurf, &r, pDstSurf, &p);
 	//	ASSERT (SUCCEEDED (hr));

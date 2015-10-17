@@ -50,3 +50,4 @@
 #include "RTS.h"
 #include "cache_manager.h"
 
+#include <algorithm>

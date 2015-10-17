@@ -34,3 +34,4 @@
 #include <atlcoll.h>
 #include <atlpath.h>
 
+#include <algorithm>

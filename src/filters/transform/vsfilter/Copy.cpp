@@ -18,6 +18,7 @@
 
 #include "stdafx.h"
 #include <math.h>
+#include <algorithm>
 #include "DirectVobSubFilter.h"
 #include "..\..\..\DSUtil\DSUtil.h"
 #include "..\..\..\DSUtil\MediaTypes.h"
@@ -198,7 +199,7 @@ HRESULT Copy(BYTE* pSub, BYTE* pIn, CSize sub, CSize in, int bpp, const GUID& su
         }
         else
         {
-            for(int k = min(j, hSub); i < k; i++, pIn += pitchIn, pSub += pitchSub)
+            for(ptrdiff_t k = std::min(j, hSub); i < k; i++, pIn += pitchIn, pSub += pitchSub)
             {
                 memsetd(pSub, black, dpLeft);
                 memcpy(pSub + dpLeft, pIn, dpMid);
@@ -372,7 +373,7 @@ void CDirectVobSubFilter::PrintMessages(BYTE* pOut)
 	pIn += pitchIn * r.top;
 	pOut += pitchOut * r.top;
 
-	for(int w = min(r.right, m_w), h = r.Height(); h--; pIn += pitchIn, pOut += pitchOut)
+	for(ptrdiff_t w = std::min<int>(r.right, m_w), h = r.Height(); h--; pIn += pitchIn, pOut += pitchOut)
 	{
 		BltLineRGB32((DWORD*)pOut, pIn, w, subtype);
 		memsetd(pIn, 0xff000000, r.right*4);

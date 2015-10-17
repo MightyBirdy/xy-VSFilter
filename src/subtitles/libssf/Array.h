@@ -47,7 +47,7 @@ namespace ssf
 
 			if(nSize > m_nMaxSize)
 			{
-				m_nMaxSize = nSize + max(m_nGrowBy, m_nSize);
+				m_nMaxSize = nSize + std::max(m_nGrowBy, m_nSize);
 				size_t nBytes = m_nMaxSize * sizeof(T);
 				m_pData = m_pData ? (T*)_aligned_realloc(m_pData, nBytes, 16) : (T*)_aligned_malloc(nBytes, 16);
 			}

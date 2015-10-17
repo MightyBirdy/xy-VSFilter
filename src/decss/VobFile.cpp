@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include <io.h>
+#include <algorithm>
 #include "VobFile.h"
 #include "CSSauth.h"
 #include "CSSscramble.h"
@@ -565,7 +566,7 @@ int CVobFile::GetPosition()
 
 int CVobFile::Seek(int pos)
 {
-	pos = min(max(pos+m_offset, m_offset), m_size-1);
+	pos = std::min(std::max(pos+m_offset, m_offset), m_size-1);
 
 	int i = -1;
 	int size = 0;

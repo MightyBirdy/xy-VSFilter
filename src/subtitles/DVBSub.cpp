@@ -22,6 +22,7 @@
 #include "stdafx.h"
 #include "DVBSub.h"
 #include "../DSUtil/GolombBuffer.h"
+#include <algorithm>
 
 #if (0) // Set to 1 to activate DVB subtitles traces
 #define TRACE_DVB TRACE
@@ -126,7 +127,7 @@ HRESULT CDVBSub::AddToBuffer(BYTE* pData, int nSize)
             }
 
             BYTE* pPrev = m_pBuffer;
-            m_nBufferSize = max(m_nBufferWritePos + nSize, m_nBufferSize + BUFFER_CHUNK_GROW);
+            m_nBufferSize = std::max(m_nBufferWritePos + nSize, m_nBufferSize + BUFFER_CHUNK_GROW);
             m_pBuffer = DEBUG_NEW BYTE[m_nBufferSize];
             if (pPrev != NULL) {
                 memcpy_s(m_pBuffer, m_nBufferSize, pPrev, m_nBufferWritePos);
@@ -246,7 +247,7 @@ HRESULT CDVBSub::ParseSample(IMediaSample* pSample)
                         if (pPage->pageState == DPS_ACQUISITION) {
                             if (m_pCurrentPage != NULL) {
                                 TRACE_DVB(_T("DVB - Force End display %s (%s - %s)\n"), ReftimeToCString(m_rtStart), ReftimeToCString(m_pCurrentPage->rtStart), ReftimeToCString(m_pCurrentPage->rtStop));
-                                m_pCurrentPage->rtStop = max(m_pCurrentPage->rtStop, m_rtStart);
+                                m_pCurrentPage->rtStop = std::max(m_pCurrentPage->rtStop, m_rtStart);
                                 m_Pages.AddTail(m_pCurrentPage.Detach());
                             }
                             UpdateTimeStamp(m_rtStart);
@@ -288,7 +289,7 @@ HRESULT CDVBSub::ParseSample(IMediaSample* pSample)
                     case END_OF_DISPLAY:
                         if (m_pCurrentPage != NULL) {
                             if (m_pCurrentPage->rtStart != m_rtStart) {
-                                m_pCurrentPage->rtStop = max(m_pCurrentPage->rtStop, m_rtStart);
+                                m_pCurrentPage->rtStop = std::max(m_pCurrentPage->rtStop, m_rtStart);
                                 TRACE_DVB(_T("DVB - End display %s - %s\n"), ReftimeToCString(m_pCurrentPage->rtStart), ReftimeToCString(m_pCurrentPage->rtStop));
                                 m_Pages.AddTail(m_pCurrentPage.Detach());
                             } else {

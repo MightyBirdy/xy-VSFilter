@@ -20,6 +20,7 @@
  */
 
 #include "stdafx.h"
+#include <algorithm>
 #include "Subtitle.h"
 #include "Split.h"
 #include <math.h>
@@ -634,10 +635,10 @@ namespace ssf
 	Color::operator DWORD()
 	{
 		DWORD c = 
-			(min(max((DWORD)b, 0), 255) <<  0) |
-			(min(max((DWORD)g, 0), 255) <<  8) |
-			(min(max((DWORD)r, 0), 255) << 16) |
-			(min(max((DWORD)a, 0), 255) << 24);
+			(std::min(std::max((DWORD)b, (DWORD)0), (DWORD)255) <<  0) |
+			(std::min(std::max((DWORD)g, (DWORD)0), (DWORD)255) <<  8) |
+			(std::min(std::max((DWORD)r, (DWORD)0), (DWORD)255) << 16) |
+			(std::min(std::max((DWORD)a, (DWORD)0), (DWORD)255) << 24);
 
 		return c;
 	}

@@ -21,6 +21,7 @@
 #include "stdafx.h"
 #include "HdmvSub.h"
 #include "../DSUtil/GolombBuffer.h"
+#include <algorithm>
 
 #if (0)		// Set to 1 to activate HDMV subtitles traces
 #define TRACE_HDMVSUB(_x_)		{CString tmp;tmp.Format _x_; XY_LOG_INFO( tmp.GetString() );}
@@ -153,7 +154,7 @@ HRESULT CHdmvSub::ParseSample(IMediaSample* pSample)
 
             if (m_nCurSegment != NO_SEGMENT) {
                 if (m_nSegBufferPos < m_nSegSize) {
-                    int nSize = min(m_nSegSize - m_nSegBufferPos, lSampleLen);
+                    int nSize = std::min(m_nSegSize - m_nSegBufferPos, lSampleLen);
                     SampleBuffer.ReadBuffer(m_pSegBuffer + m_nSegBufferPos, nSize);
                     m_nSegBufferPos += nSize;
                 }
@@ -363,10 +364,10 @@ void CHdmvSub::Render(SubPicDesc& spd, REFERENCE_TIME rt, RECT& bbox)
                 pObject->SetPalette(pPresentationSegment->CLUT.size, pPresentationSegment->CLUT.palette, color_type, 
                     m_yuvRangeSetting==CompositionObject::RANGE_NONE ? CompositionObject::RANGE_TV : m_yuvRangeSetting);
 
-                bbox.left   = min(pObject->m_horizontal_position, bbox.left);
-                bbox.top    = min(pObject->m_vertical_position, bbox.top);
-                bbox.right  = max(pObject->m_horizontal_position + pObject->m_width, bbox.right);
-                bbox.bottom = max(pObject->m_vertical_position + pObject->m_height, bbox.bottom);
+                bbox.left   = std::min(pObject->m_horizontal_position, bbox.left);
+                bbox.top    = std::min(pObject->m_vertical_position, bbox.top);
+                bbox.right  = std::max(pObject->m_horizontal_position + pObject->m_width, bbox.right);
+                bbox.bottom = std::max(pObject->m_vertical_position + pObject->m_height, bbox.bottom);
 
                 ASSERT(spd.h>=0);
                 bbox.left = bbox.left > 0 ? bbox.left : 0;

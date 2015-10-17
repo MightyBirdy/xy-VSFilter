@@ -912,7 +912,7 @@ static bool OpenMicroDVD(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet)
             if(fCheck2 && !ret.IsEmpty())
             {
                 STSEntry& stse = ret.m_entries[ret.m_entries.GetCount()-1];
-                stse.end = min(stse.end, start);
+                stse.end = std::min(stse.end, start);
                 fCheck2 = false;
             }
 
@@ -1447,7 +1447,7 @@ static bool OpenSubStationAlpha(CTextFile* file, CSimpleTextSubtitle& ret, int C
                 Effect = WToT(TryNextStr(&__buff));
 
                 CStringW buff2 = __buff;
-                int len = min(Effect.GetLength(), buff2.GetLength());
+                int len = std::min(Effect.GetLength(), buff2.GetLength());
                 if(Effect.Left(len) == WToT(buff2.Left(len))) Effect.Empty();
 
                 Style.TrimLeft(_T('*'));
@@ -1505,18 +1505,18 @@ if(sver <= 4)   alpha = GetInt(buff);
 if(sver >= 6)   style->relativeTo = GetInt(buff);
 
 if(sver <= 4)   style->colors[2] = style->colors[3]; // style->colors[2] is used for drawing the outline
-if(sver <= 4)   alpha = max(min(alpha, 0xff), 0);
+if(sver <= 4)   alpha = std::max(std::min(alpha, 0xff), 0);
 if(sver <= 4)   {for(size_t i = 0; i < 3; i++) style->alpha[i] = alpha; style->alpha[3] = 0x80;}
 if(sver >= 5)   for(size_t i = 0; i < 4; i++) {style->alpha[i] = (BYTE)(style->colors[i]>>24); style->colors[i] &= 0xffffff;}
-if(sver >= 5)   style->fontScaleX = max(style->fontScaleX, 0);
-if(sver >= 5)   style->fontScaleY = max(style->fontScaleY, 0);
-if(sver >= 5)   style->fontSpacing = max(style->fontSpacing, 0);
+if(sver >= 5)   style->fontScaleX = std::max(style->fontScaleX, 0.0);
+if(sver >= 5)   style->fontScaleY = std::max(style->fontScaleY, 0.0);
+if(sver >= 5)   style->fontSpacing = std::max(style->fontSpacing, 0.0);
                 style->fontAngleX = style->fontAngleY = 0;
                 style->borderStyle = style->borderStyle == 1 ? 0 : style->borderStyle == 3 ? 1 : 0;
-                style->outlineWidthX = max(style->outlineWidthX, 0);
-                style->outlineWidthY = max(style->outlineWidthY, 0);
-                style->shadowDepthX = max(style->shadowDepthX, 0);
-                style->shadowDepthY = max(style->shadowDepthY, 0);
+                style->outlineWidthX = std::max(style->outlineWidthX, 0.0);
+                style->outlineWidthY = std::max(style->outlineWidthY, 0.0);
+                style->shadowDepthX = std::max(style->shadowDepthX, 0.0);
+                style->shadowDepthY = std::max(style->shadowDepthY, 0.0);
 if(sver <= 4)   style->scrAlignment = (style->scrAlignment&4) ? ((style->scrAlignment&3)+6) // top
                                         : (style->scrAlignment&8) ? ((style->scrAlignment&3)+3) // mid
                                         : (style->scrAlignment&3); // bottom
@@ -1730,14 +1730,14 @@ static bool OpenXombieSub(CTextFile* file, CSimpleTextSubtitle& ret, int CharSet
 
                 style->charSet = GetInt(buff);
 
-                style->fontScaleX = max(style->fontScaleX, 0);
-                style->fontScaleY = max(style->fontScaleY, 0);
-                style->fontSpacing = max(style->fontSpacing, 0);
+                style->fontScaleX = std::max(style->fontScaleX, 0.0);
+                style->fontScaleY = std::max(style->fontScaleY, 0.0);
+                style->fontSpacing = std::max(style->fontSpacing, 0.0);
                 style->borderStyle = style->borderStyle == 1 ? 0 : style->borderStyle == 3 ? 1 : 0;
-                style->outlineWidthX = max(style->outlineWidthX, 0);
-                style->outlineWidthY = max(style->outlineWidthY, 0);
-                style->shadowDepthX = max(style->shadowDepthX, 0);
-                style->shadowDepthY = max(style->shadowDepthY, 0);
+                style->outlineWidthX = std::max(style->outlineWidthX, 0.0);
+                style->outlineWidthY = std::max(style->outlineWidthY, 0.0);
+                style->shadowDepthX = std::max(style->shadowDepthX, 0.0);
+                style->shadowDepthY = std::max(style->shadowDepthY, 0.0);
 
                 ret.AddStyle(StyleName, style);
             }
@@ -2083,7 +2083,7 @@ void CSimpleTextSubtitle::Add(CStringW str, bool fUnicode, int start, int end,
         } else if (i < segmentsCount && start < m_segments[i].start) {
             // The new entry doesn't start in an existing segment.
             // It might even not overlap with any segment at all
-            STSSegment stss(start, min(end, m_segments[i].start));
+            STSSegment stss(start, std::min(end, m_segments[i].start));
             stss.subs.Add(n);
             m_segments.InsertAt(i, stss);
             i++;
@@ -2134,7 +2134,7 @@ void CSimpleTextSubtitle::Add(CStringW str, bool fUnicode, int start, int end,
         if (end > m_segments[i - 1].end) {
             // The new entry ends after the last overlapping segment.
             // It might even not overlap with any segment at all
-            STSSegment stss(max(start, m_segments[i - 1].end), end);
+            STSSegment stss(std::max(start, m_segments[i - 1].end), end);
             stss.subs.Add(n);
             m_segments.InsertAt(i, stss);
         }

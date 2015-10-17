@@ -22,6 +22,7 @@
 #include "stdafx.h"
 #include <atlbase.h>
 #include <afxinet.h>
+#include <algorithm>
 #include "TextFile.h"
 #include "Utf8.h"
 
@@ -163,7 +164,7 @@ ULONGLONG CTextFile::Seek(LONGLONG lOff, UINT nFrom)
 	case end: lOff = len - lOff; break;
 	}
 
-    lOff = max((LONGLONG)min((ULONGLONG)lOff, len), 0ll) + m_offset;
+    lOff = std::max((LONGLONG)std::min((ULONGLONG)lOff, len), 0ll) + m_offset;
 
 	pos = __super::Seek(lOff, begin) - m_offset;
 

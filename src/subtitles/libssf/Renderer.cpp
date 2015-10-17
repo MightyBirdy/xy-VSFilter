@@ -22,6 +22,7 @@
  */
 
 #include "stdafx.h"
+#include <algorithm>
 #include "Renderer.h"
 #include "Arabic.h"
 
@@ -140,10 +141,10 @@ namespace ssf
 		if(style.placement.clip.b == -1) clip.bottom = vs.cy;
 		else clip.bottom = (int)(spdrc.top + style.placement.clip.b * scale.cy);
 
-		clip.left = max(clip.left, 0);
-		clip.top = max(clip.top, 0);
-		clip.right = min(clip.right, vs.cx);
-		clip.bottom = min(clip.bottom, vs.cy);
+		clip.left = std::max(clip.left, 0l);
+		clip.top = std::max(clip.top, 0l);
+		clip.right = std::min(clip.right, vs.cx);
+		clip.bottom = std::min(clip.bottom, vs.cy);
 
 		scale.cx *= 64;
 		scale.cy *= 64;
@@ -438,13 +439,13 @@ namespace ssf
 
 				w += g->width;
 				if(gpos) w += g->spacing;
-				h = max(h, g->ascent + g->descent);
+				h = std::max(h, g->ascent + g->descent);
 
 				r->width += g->width;
 				if(gpos) r->width += g->spacing;
-				r->ascent = max(r->ascent, g->ascent);
-				r->descent = max(r->descent, g->descent);
-				r->border = max(r->border, g->GetBackgroundSize());
+				r->ascent = std::max(r->ascent, g->ascent);
+				r->descent = std::max(r->descent, g->descent);
+				r->border = std::max(r->border, (int)g->GetBackgroundSize());
 			}
 
 			for(POSITION gpos = r->GetHeadPosition(); gpos; r->GetNext(gpos))
@@ -457,11 +458,11 @@ namespace ssf
 			if(vertical)
 			{
 				size.cx += h;
-				size.cy = max(size.cy, w);
+				size.cy = std::max(size.cy, (LONG)w);
 			}
 			else
 			{
-				size.cx = max(size.cx, w);
+				size.cx = std::max(size.cx, (LONG)w);
 				size.cy += h;
 			}
 		}

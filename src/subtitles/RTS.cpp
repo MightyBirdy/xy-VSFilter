@@ -22,6 +22,7 @@
 #include "stdafx.h"
 #include <math.h>
 #include <time.h>
+#include <algorithm>
 #include "RTS.h"
 #include "draw_item.h"
 #include "cache_manager.h"
@@ -440,7 +441,7 @@ void CWord::Transform_C(PathData* path_data, const CPointCoor2 &org )
     /******************
      Formula:
        (x,y,z)' = (S0*A0*A1*A2*A3*A4 + B0) * (x y 1)'
-       z = max(1000,z)
+       z = std::max(1000,z)
        x = x/z + tagetScaleX*org.x
        y = y/z + tagetScaleY*org.y
     *******************/
@@ -1138,8 +1139,8 @@ bool CPolygon::ParseStr()
         if(maxx < m_pathPointsOrg[i].x) maxx = m_pathPointsOrg[i].x;
         if(maxy < m_pathPointsOrg[i].y) maxy = m_pathPointsOrg[i].y;
     }
-    m_width = max(maxx - minx, 0);
-    m_ascent = max(maxy - miny, 0);
+    m_width = std::max(maxx - minx, 0);
+    m_ascent = std::max(maxy - miny, 0);
     int baseline = (int)(64 * m_scaley * m_baseline);
     m_descent = baseline;
     m_ascent -= baseline;
@@ -1283,7 +1284,7 @@ GrayImage2* CClipper::PaintBannerClipper()
     for(int j = 0; j < h; j++, am += w)
     {
         int a = 0;
-        int k = min(width, w);
+        int k = std::min(width, w);
         for(int i = 0; i < k; i++, a += da)
             am[i] = (am[i]*a)>>14;
         a = 0x40<<8;
@@ -1762,7 +1763,7 @@ void CSubtitle::MakeLines(CSize size, CRect marginRect)
         l = GetNextLine(pos, size.cx - marginRect.left - marginRect.right);
         if(!l) break;
         if(fFirstLine) {m_topborder = l->m_borderY; fFirstLine = false;}
-        spaceNeeded.cx = max(l->m_width+l->m_borderX, spaceNeeded.cx);
+        spaceNeeded.cx = std::max<long>(l->m_width+l->m_borderX, spaceNeeded.cx);
         spaceNeeded.cy += l->m_ascent + l->m_descent;
         AddTail(l);
     }
@@ -2062,7 +2063,7 @@ void CRenderedTextSubtitle::ParseEffect(CSubtitle* sub, const CStringW& str)
         Effect* e = new Effect;
         if(!e) return;
         sub->m_effects[e->type = EF_BANNER] = e;
-        e->param[0] = (int)(max(1.0*delay/sub->m_scalex, 1));
+        e->param[0] = (int)(std::max(1.0*delay/sub->m_scalex, 1.0));
         e->param[1] = lefttoright;
         e->param[2] = (int)(sub->m_scalex*fadeawaywidth);
         sub->m_wrapStyle = 2;
@@ -2077,7 +2078,7 @@ void CRenderedTextSubtitle::ParseEffect(CSubtitle* sub, const CStringW& str)
         sub->m_effects[e->type = EF_SCROLL] = e;
         e->param[0] = (int)(sub->m_scaley*top*8);
         e->param[1] = (int)(sub->m_scaley*bottom*8);
-        e->param[2] = (int)(max(1.0*delay/sub->m_scaley, 1));
+        e->param[2] = (int)(std::max(1.0*delay/sub->m_scaley, 1.0));
         e->param[3] = (effect.GetLength() == 12);
         e->param[4] = (int)(sub->m_scaley*fadeawayheight);
     }
@@ -2249,7 +2250,7 @@ bool CRenderedTextSubtitle::ParseSSATag( AssTagList *assTags, const CStringW& st
         }
 
         AssCmdType cmd_type = CMD_COUNT;
-        int cmd_length = min(MAX_CMD_LENGTH, cmd.GetLength());
+        int cmd_length = std::min(MAX_CMD_LENGTH, cmd.GetLength());
         for( ;cmd_length>=MIN_CMD_LENGTH;cmd_length-- )
         {
             if( m_cmdMap.Lookup(cmd.Left(cmd_length), cmd_type) )
@@ -2451,7 +2452,7 @@ bool CRenderedTextSubtitle::ParseSSATag( CSubtitle* sub, const AssTagList& assTa
                 }
                 else if(params.GetCount() == 2 && !sub->m_pClipper)
                 {
-                    int scale = max(wcstol(p, NULL, 10), 1);
+                    int scale = std::max(wcstol(p, NULL, 10), 1l);
                     sub->m_pClipper.reset( new CClipper(params[1], CSize(m_size_scale_to.cx>>3, m_size_scale_to.cy>>3), sub->m_scalex/(1<<(scale-1)), sub->m_scaley/(1<<(scale-1)), invert, m_target_scale_x, m_target_scale_y) );
                 }
                 else if(params.GetCount() == 4)
@@ -3144,8 +3145,8 @@ STDMETHODIMP_(POSITION) CRenderedTextSubtitle::GetStartPosition(REFERENCE_TIME r
     }
     else
     {
-        //Todo: fix me. max has been defined as a macro. Use #define NOMINMAX to fix it.
-        //std::numeric_limits<int>::max(); 
+        //Todo: fix me. std::max has been defined as a macro. Use #define NOMINMAX to fix it.
+        //std::numeric_limits<int>::std::max(); 
         m_period = INT_MAX;
     }
 

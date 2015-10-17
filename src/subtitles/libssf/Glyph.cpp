@@ -20,6 +20,7 @@
  */
 
 #include "stdafx.h"
+#include <algorithm>
 #include "Glyph.h"
 #include "Split.h"
 
@@ -203,7 +204,7 @@ namespace ssf
 					else
 					{
 						float u = size / spline.GetCount();
-						sc = &spline[max((int)(pos / u), 0)];
+						sc = &spline[std::max((int)(pos / u), 0)];
 						t = fmod(pos, u) / u;
 					}
 
@@ -232,7 +233,7 @@ namespace ssf
 					yy = y;
 					zz = x*say - z*cay;
 
-					zz = 1.0f / (max(zz, -19000) + 20000);
+					zz = 1.0f / (std::max<float>(zz, -19000.0) + 20000);
 
 					x = (xx * 20000) * zz;
 					y = (yy * 20000) * zz;

@@ -1030,7 +1030,7 @@ bool Rasterizer::OldFixedPointBlur(const Overlay& input_overlay, float be_streng
         }
     }
 
-    ass_tmp_buf tmp_buf( max((output_overlay->mOverlayPitch+1)*(output_overlay->mOverlayHeight+1),0) );        
+    ass_tmp_buf tmp_buf( _MAX((output_overlay->mOverlayPitch+1)*(output_overlay->mOverlayHeight+1),0) );        
     //flyweight<key_value<int, ass_tmp_buf, ass_tmp_buf_get_size>, no_locking> tmp_buf((overlay->mOverlayWidth+1)*(overlay->mOverlayPitch+1));
     // Do some gaussian blur magic    
     if ( gaussian_blur_strength > GAUSSIAN_BLUR_THREHOLD )
@@ -1279,7 +1279,7 @@ bool Rasterizer::BeBlur( const Overlay& input_overlay, float be_strength,
     int pass_num = static_cast<int>(scaled_be_strength);
     int pitch = output_overlay->mOverlayPitch;
     byte* blur_plan = output_overlay->mfWideOutlineEmpty ? body : border;
-    ass_tmp_buf tmp_buf( max((output_overlay->mOverlayPitch+1)*(output_overlay->mOverlayHeight+1),0) );
+    ass_tmp_buf tmp_buf( _MAX((output_overlay->mOverlayPitch+1)*(output_overlay->mOverlayHeight+1),0) );
     for (int pass = 0; pass < pass_num; pass++)
     {
         if(output_overlay->mOverlayWidth >= 3 && output_overlay->mOverlayHeight >= 3)
@@ -3046,7 +3046,7 @@ bool ScanLineData2::CreateWidenedRegion(int rx, int ry)
 {
     if(rx < 0) rx = 0;
     if(ry < 0) ry = 0;
-    mWideBorder = max(rx,ry);
+    mWideBorder = _MAX(rx,ry);
     mWideOutline.clear();
 
     const tSpanBuffer& out_line = m_scan_line_data->mOutline;

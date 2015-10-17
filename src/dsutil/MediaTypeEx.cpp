@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include <algorithm>
 #include "DSUtil.h"
 #include "MediaTypeEx.h"
 
@@ -611,21 +612,21 @@ void CMediaTypeEx::Dump(CAtlList<CString>& sl)
 		{
 			str.Format(_T("%04x:"), i);
 
-			for(ptrdiff_t k = i, l = min(i + 16, (int)cbFormat); k < l; k++)
+			for(ptrdiff_t k = i, l = std::min(i + 16, (ptrdiff_t)cbFormat); k < l; k++)
 			{
 				CString byte;
 				byte.Format(_T("%c%02x"), fmtsize > 0 && fmtsize == k ? '|' : ' ', pbFormat[k]);
 				str += byte;
 			}
 
-			for(ptrdiff_t k = min(i + 16, (int)cbFormat), l = i + 16; k < l; k++)
+			for(ptrdiff_t k = std::min(i + 16, (ptrdiff_t)cbFormat), l = i + 16; k < l; k++)
 			{
 				str += _T("   ");
 			}
 
 			str += ' ';
 
-			for(ptrdiff_t k = i, l = min(i + 16, (int)cbFormat); k < l; k++)
+			for(ptrdiff_t k = i, l = std::min(i + 16, (ptrdiff_t)cbFormat); k < l; k++)
 			{
 				unsigned char c = (unsigned char)pbFormat[k];
 				CStringA ch;

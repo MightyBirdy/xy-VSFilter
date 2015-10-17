@@ -67,7 +67,7 @@ namespace ssf
 		if(abs(p0.x + p2.x - p1.x*2) +
 		   abs(p0.y + p2.y - p1.y*2) +
 		   abs(p1.x + p3.x - p2.x*2) +
-		   abs(p1.y + p3.y - p2.y*2) <= max(2, 1<<FONT_AA))
+		   abs(p1.y + p3.y - p2.y*2) <= std::max(2, 1<<FONT_AA))
 		{
 			_EvaluateLine(p0, p3);
 		}
@@ -546,7 +546,7 @@ namespace ssf
 			{
 				for(int i = 0; i < mOverlayWidth; i++)
 				{
-					p[i*4+2] = min(p[i*4+1], (1<<6) - p[i*4]); // TODO: sse2
+					p[i*4+2] = std::min<BYTE>(p[i*4+1], (1<<6) - p[i*4]); // TODO: sse2
 				}
 			}
 		}

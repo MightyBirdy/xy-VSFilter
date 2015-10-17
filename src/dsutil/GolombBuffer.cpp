@@ -19,6 +19,7 @@
  */
 
 #include "stdafx.h"
+#include <algorithm>
 #include "GolombBuffer.h"
 
 CGolombBuffer::CGolombBuffer(BYTE* pBuffer, int nSize)
@@ -85,7 +86,7 @@ void CGolombBuffer::ReadBuffer(BYTE* pDest, int nSize)
 {
     ASSERT(m_nBitPos + nSize <= m_nSize);
     ASSERT(m_bitlen == 0);
-    nSize = min(nSize, m_nSize - m_nBitPos);
+    nSize = std::min(nSize, m_nSize - m_nBitPos);
 
     memcpy(pDest, m_pBuffer + m_nBitPos, nSize);
     m_nBitPos += nSize;
