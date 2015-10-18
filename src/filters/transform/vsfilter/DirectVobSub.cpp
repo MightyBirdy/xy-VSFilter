@@ -456,9 +456,9 @@ STDMETHODIMP CDirectVobSub::put_TextSettings(void* lf, int lflen, COLORREF color
 
 		if(tmp.fontSize < 0)
 		{
-			HDC hdc = ::GetDC(0);
+			HDC hdc = ::GetDC(nullptr);
 			m_defStyle.fontSize = -m_defStyle.fontSize * 72 / GetDeviceCaps(hdc, LOGPIXELSY);
-			::ReleaseDC(0, hdc);
+			::ReleaseDC(nullptr, hdc);
 		}
 
 	}
