@@ -21,64 +21,74 @@
 
 #pragma once
 
-#include <afx.h>
-
 #include "StdioFile64.h"
 
-class CTextFile : protected CStdioFile
+class CTextFile : protected CStdioFile64
 {
 public:
-	typedef enum {DEFAULT_ENCODING, UTF8, LE16, BE16, ANSI} enc;
+    enum enc {
+        DEFAULT_ENCODING,
+        UTF8,
+        LE16,
+        BE16,
+        ANSI
+    };
 
 private:
-	enc m_encoding, m_defaultencoding;
-	int m_offset;
+    enc m_encoding, m_defaultencoding;
+    int m_offset;
+    ULONGLONG m_posInFile;
+    CAutoVectorPtr<char> m_buffer;
+    CAutoVectorPtr<WCHAR> m_wbuffer;
+    LONGLONG m_posInBuffer, m_nInBuffer;
 
 public:
-	CTextFile(enc e = DEFAULT_ENCODING);
+    CTextFile(enc e = DEFAULT_ENCODING);
 
-	virtual bool Open(LPCTSTR lpszFileName);
-	virtual bool Save(LPCTSTR lpszFileName, enc e /*= DEFAULT_ENCODING*/);
+    virtual bool Open(LPCTSTR lpszFileName);
+    virtual bool Save(LPCTSTR lpszFileName, enc e /*= DEFAULT_ENCODING*/);
 
-	void SetEncoding(enc e);
-	enc GetEncoding();
-	bool IsUnicode();
+    void SetEncoding(enc e);
+    enc GetEncoding();
+    bool IsUnicode();
 
-	// CFile
-	virtual UINT Read(void* lpBuf, UINT nCount);
-	CString GetFilePath() const;
+    // CFile
 
-	// CStdioFile
+    CString GetFilePath() const;
+
+    // CStdioFile
 
     ULONGLONG GetPosition() const;
-	ULONGLONG GetLength() const;
-	ULONGLONG Seek(LONGLONG lOff, UINT nFrom);
+    ULONGLONG GetLength() const;
+    ULONGLONG Seek(LONGLONG lOff, UINT nFrom);
 
-	void WriteString(LPCSTR lpsz/*CStringA str*/);
-	void WriteString(LPCWSTR lpsz/*CStringW str*/);
-	BOOL ReadString(CStringA& str);
-	BOOL ReadString(CStringW& str);
+    void WriteString(LPCSTR lpsz/*CStringA str*/);
+    void WriteString(LPCWSTR lpsz/*CStringW str*/);
+    BOOL ReadString(CStringA& str);
+    BOOL ReadString(CStringW& str);
 
 protected:
     virtual bool ReopenAsText();
+    bool FillBuffer();
+    ULONGLONG GetPositionFastBuffered() const;
 };
 
 class CWebTextFile : public CTextFile
 {
-	LONGLONG m_llMaxSize;
-	CString m_tempfn;
+    LONGLONG m_llMaxSize;
+    CString m_tempfn;
 
 public:
     CWebTextFile(CTextFile::enc e = DEFAULT_ENCODING, LONGLONG llMaxSize = 1024 * 1024);
 
-	bool Open(LPCTSTR lpszFileName);
-	bool Save(LPCTSTR lpszFileName, enc e /*= DEFAULT_ENCODING*/);
-	void Close();
+    bool Open(LPCTSTR lpszFileName);
+    bool Save(LPCTSTR lpszFileName, enc e /*= DEFAULT_ENCODING*/);
+    void Close();
 };
 
-CStringW AToW(const CStringA& str);
-CStringA WToA(const CStringW& str);
-CString  AToT(const CStringA& str);
-CString  WToT(const CStringW& str);
-CStringA TToA(const CString&  str);
-CStringW TToW(const CString&  str);
+extern CStringW AToW(CStringA str);
+extern CStringA WToA(CStringW str);
+extern CString  AToT(CStringA str);
+extern CString  WToT(CStringW str);
+extern CStringA TToA(CString  str);
+extern CStringW TToW(CString  str);
