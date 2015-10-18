@@ -32,6 +32,7 @@ CVobSubImage::CVobSubImage()
 	rect = CRect(0,0,0,0);
 	lpPixels = lpTemp1 = lpTemp2 = NULL;
 	org = CSize(0,0);
+	tCurrent = -1;
 }
 
 CVobSubImage::~CVobSubImage()
