@@ -397,7 +397,7 @@ bool CUSFSubtitles::ParseUSFSubtitles(CComPtr<IXMLDOMNode> pNode)
 
 		BeginEnumChildren(pNode, pChild)
 		{
-			DeclareNameAndValue(pChild, name, val);
+			DeclareNameAndValue(pChild, childName, childVal);
 
 			if(name == L"metadata")
 			{
@@ -410,15 +410,15 @@ bool CUSFSubtitles::ParseUSFSubtitles(CComPtr<IXMLDOMNode> pNode)
 
 		BeginEnumChildren(pNode, pChild)
 		{
-			DeclareNameAndValue(pChild, name, val);
+			DeclareNameAndValue(pChild, childName, childVal);
 
-			if(name == L"styles")
+			if(childName == L"styles")
 			{
 				BeginEnumChildren(pChild, pGrandChild) // :)
 				{
-					DeclareNameAndValue(pGrandChild, name, val);
+					DeclareNameAndValue(pGrandChild, grandChildName, grandChildVal);
 
-					if(name == L"style")
+					if(grandChildName == L"style")
 					{
 						CAutoPtr<style_t> s(new style_t);
 						if(s)
@@ -437,15 +437,15 @@ bool CUSFSubtitles::ParseUSFSubtitles(CComPtr<IXMLDOMNode> pNode)
 
 		BeginEnumChildren(pNode, pChild)
 		{
-			DeclareNameAndValue(pChild, name, val);
+			DeclareNameAndValue(pChild, childName, childVal);
 
-			if(name == L"effects")
+			if(childName == L"effects")
 			{
 				BeginEnumChildren(pChild, pGrandChild) // :)
 				{
-					DeclareNameAndValue(pGrandChild, name, val);
+					DeclareNameAndValue(pGrandChild, grandChildName, grandChildVal);
 
-					if(name == L"effect")
+					if(grandChildName == L"effect")
 					{
 						CAutoPtr<effect_t> e(new effect_t);
 						if(e)
@@ -464,15 +464,15 @@ bool CUSFSubtitles::ParseUSFSubtitles(CComPtr<IXMLDOMNode> pNode)
 
 		BeginEnumChildren(pNode, pChild)
 		{
-			DeclareNameAndValue(pChild, name, val);
+			DeclareNameAndValue(pChild, childName, childVal);
 
-			if(name == L"subtitles")
+			if(childName == L"subtitles")
 			{
 				BeginEnumChildren(pChild, pGrandChild) // :)
 				{
-					DeclareNameAndValue(pGrandChild, name, val);
+					DeclareNameAndValue(pGrandChild, grandChildName, grandChildVal);
 
-					if(name == L"subtitle")
+					if(grandChildName == L"subtitle")
 					{
 						CStringW sstart = GetAttrib(L"start", pGrandChild);
 						CStringW sstop = GetAttrib(L"stop", pGrandChild);
@@ -526,13 +526,13 @@ void CUSFSubtitles::ParseMetadata(CComPtr<IXMLDOMNode> pNode, metadata_t& m)
 	{
 		BeginEnumChildren(pNode, pChild)
 		{
-			DeclareNameAndValue(pChild, name, val);
+			DeclareNameAndValue(pChild, childName, childVal);
 
-			if(name == L"name")
+			if(childName == L"name")
 				m.author.name = GetText(pChild);
-			else if(name == L"email")
+			else if(childName == L"email")
 				m.author.email = GetText(pChild);
-			else if(name == L"url")
+			else if(childName == L"url")
 				m.author.url = GetText(pChild);
 		}
 		EndEnumChildren
@@ -623,9 +623,9 @@ void CUSFSubtitles::ParseEffect(CComPtr<IXMLDOMNode> pNode, effect_t* e)
 	{
 		BeginEnumChildren(pNode, pChild)
 		{
-			DeclareNameAndValue(pChild, name, val);
+			DeclareNameAndValue(pChild, childName, childVal);
 
-			if(name == L"keyframe")
+			if(childName == L"keyframe")
 			{
 				CAutoPtr<keyframe_t> k(new keyframe_t);
 				if(k)
