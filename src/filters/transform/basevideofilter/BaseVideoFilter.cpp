@@ -886,7 +886,7 @@ HRESULT CBaseVideoFilter::GetUpstreamOutputPriority( int *priorities, UINT count
         ASSERT(pMediaType);
 
         ColorSpaceId pos = Subtype2OutputColorSpaceId(pMediaType->subtype, 0);
-        while(pos>=0 && pos<count)
+        while(pos>=0 && (UINT)pos<count)
         {
             priorities[pos] = priority;
             priority--;

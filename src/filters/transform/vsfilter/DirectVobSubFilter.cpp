@@ -1976,7 +1976,7 @@ void CDirectVobSubFilter::InvalidateSubtitle(REFERENCE_TIME rtInvalidate, DWORD_
 
 	if(m_simple_provider)
 	{
-		if(nSubtitleId == -1 || nSubtitleId == m_nSubtitleId)
+		if(nSubtitleId == DWORD_PTR_MAX || nSubtitleId == m_nSubtitleId)
 		{
 			DbgLog((LOG_TRACE, 3, "InvalidateSubtitle::Invalidate"));
 			m_simple_provider->Invalidate(rtInvalidate);

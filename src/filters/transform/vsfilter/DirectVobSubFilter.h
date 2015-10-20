@@ -181,12 +181,12 @@ protected:
 	DWORD_PTR m_nSubtitleId;
 	void UpdateSubtitle(bool fApplyDefStyle = true);
 	void SetSubtitle(ISubStream* pSubStream, bool fApplyDefStyle = true);
-	void InvalidateSubtitle(REFERENCE_TIME rtInvalidate = -1, DWORD_PTR nSubtitleId = -1);
+	void InvalidateSubtitle(REFERENCE_TIME rtInvalidate = -1, DWORD_PTR nSubtitleId = DWORD_PTR_MAX);
 
 	// the text input pin is using these
 	void AddSubStream(ISubStream* pSubStream);
 	void RemoveSubStream(ISubStream* pSubStream);
-	void Post_EC_OLE_EVENT(CString str, DWORD_PTR nSubtitleId = -1);
+	void Post_EC_OLE_EVENT(CString str, DWORD_PTR nSubtitleId = DWORD_PTR_MAX);
 
 private:
 	class CFileReloaderData

@@ -1722,11 +1722,11 @@ SharedPtrByte Rasterizer::CompositeAlphaMask(const SharedPtrOverlay& overlay, co
         while( last_x<w+xo )
         {   
             byte alpha = sw[0]>>24; 
-            while( sw[3]<w+xo && (sw[2]>>24)==alpha )
+            while( sw[3]<(DWORD)(w+xo) && (sw[2]>>24)==alpha )
             {
                 sw += 2;
             }
-            int new_x = sw[3] < w+xo ? sw[3] : w+xo;
+            int new_x = sw[3] < (DWORD)(w+xo) ? sw[3] : w+xo;
             overlay->FillAlphaMash(s_base, fBody, fBorder, 
                 last_x, yo, new_x-last_x, h, 
                 alpha_mask_data, alpha_mask_pitch,
@@ -1800,7 +1800,7 @@ void Rasterizer::Draw(XyBitmap* bitmap, SharedPtrOverlay overlay, const CRect& c
     // Every remaining line in the bitmap to be rendered...
     switch(draw_method)
     {
-    case   DM::SINGLE_COLOR |   DM::SSE2 | 0*DM::AYUV_PLANAR :
+    case DM::SINGLE_COLOR | DM::SSE2 | 0*DM::AYUV_PLANAR :
     {
         while(h--)
         {
@@ -1814,7 +1814,7 @@ void Rasterizer::Draw(XyBitmap* bitmap, SharedPtrOverlay overlay, const CRect& c
         }
     }
     break;
-    case   DM::SINGLE_COLOR | 0*DM::SSE2 | 0*DM::AYUV_PLANAR :
+    case DM::SINGLE_COLOR | 0*DM::SSE2 | 0*DM::AYUV_PLANAR :
     {
         while(h--)
         {
@@ -1825,7 +1825,7 @@ void Rasterizer::Draw(XyBitmap* bitmap, SharedPtrOverlay overlay, const CRect& c
         }
     }
     break;
-    case 0*DM::SINGLE_COLOR |   DM::SSE2 | 0*DM::AYUV_PLANAR :
+    case 0*DM::SINGLE_COLOR | DM::SSE2 | 0*DM::AYUV_PLANAR :
     {
         while(h--)
         {
@@ -1835,7 +1835,7 @@ void Rasterizer::Draw(XyBitmap* bitmap, SharedPtrOverlay overlay, const CRect& c
                 // xo is the offset (usually negative) we have moved into the image
                 // So if we have passed the switchpoint (?) switch to another colour
                 // (So switchpts stores both colours *and* coordinates?)
-                if(wt+xo >= sw[1]) {while(wt+xo >= sw[1]) sw += 2; color = sw[-2];}
+                if((DWORD)(wt+xo) >= sw[1]) {while((DWORD)(wt+xo) >= sw[1]) sw += 2; color = sw[-2];}
                 pixmix_sse2(&dst[wt], color, s[wt]);
             }
             s += overlayPitch;
@@ -1850,7 +1850,7 @@ void Rasterizer::Draw(XyBitmap* bitmap, SharedPtrOverlay overlay, const CRect& c
             const DWORD *sw = switchpts;
             for(int wt=0; wt<w; ++wt)
             {
-                if(wt+xo >= sw[1]) {while(wt+xo >= sw[1]) sw += 2; color = sw[-2];}
+                if((DWORD)(wt+xo) >= sw[1]) {while((DWORD)(wt+xo) >= sw[1]) sw += 2; color = sw[-2];}
                 pixmix(&dst[wt], color, s[wt]);
             }
             s += overlayPitch;
@@ -1858,7 +1858,7 @@ void Rasterizer::Draw(XyBitmap* bitmap, SharedPtrOverlay overlay, const CRect& c
         }
     }
     break;
-    case   DM::SINGLE_COLOR |   DM::SSE2 |   DM::AYUV_PLANAR :
+    case DM::SINGLE_COLOR | DM::SSE2 | DM::AYUV_PLANAR :
     {
         unsigned char* dst_A = bitmap->plans[0] + dst_offset;
         unsigned char* dst_Y = bitmap->plans[1] + dst_offset;
@@ -1871,7 +1871,7 @@ void Rasterizer::Draw(XyBitmap* bitmap, SharedPtrOverlay overlay, const CRect& c
         AlphaBlt(dst_A, s, 0, h, w, overlayPitch, bitmap->pitch);
     }
     break;
-    case 0*DM::SINGLE_COLOR |   DM::SSE2 |   DM::AYUV_PLANAR :
+    case 0*DM::SINGLE_COLOR | DM::SSE2 | DM::AYUV_PLANAR :
     {
         unsigned char* dst_A = bitmap->plans[0] + dst_offset;
         unsigned char* dst_Y = bitmap->plans[1] + dst_offset;
@@ -1883,7 +1883,7 @@ void Rasterizer::Draw(XyBitmap* bitmap, SharedPtrOverlay overlay, const CRect& c
         color = sw[0];
         while(last_x<w+xo)
         {
-            int new_x = sw[3] < w+xo ? sw[3] : w+xo;
+            int new_x = sw[3] < (DWORD)(w+xo) ? sw[3] : w+xo;
             color = sw[0];
             sw += 2;
             if( new_x < last_x )
@@ -1901,7 +1901,7 @@ void Rasterizer::Draw(XyBitmap* bitmap, SharedPtrOverlay overlay, const CRect& c
         }
     }
     break;
-    case   DM::SINGLE_COLOR | 0*DM::SSE2 |   DM::AYUV_PLANAR :
+    case DM::SINGLE_COLOR | 0*DM::SSE2 | DM::AYUV_PLANAR :
     {
 //        char * debug_dst=(char*)dst;int h2 = h;
 //        XY_DO_ONCE( xy_logger::write_file("G:\\b2_rt", (char*)&color, sizeof(color)) );
@@ -1941,7 +1941,7 @@ void Rasterizer::Draw(XyBitmap* bitmap, SharedPtrOverlay overlay, const CRect& c
 //        XY_DO_ONCE( xy_logger::write_file("G:\\a2_rt", debug_dst, (h2-1)*spd.pitch) );
     }
     break;
-    case 0*DM::SINGLE_COLOR | 0*DM::SSE2 |   DM::AYUV_PLANAR :
+    case 0*DM::SINGLE_COLOR | 0*DM::SSE2 | DM::AYUV_PLANAR :
     {
         unsigned char* dst_A = bitmap->plans[0] + dst_offset;
         unsigned char* dst_Y = bitmap->plans[1] + dst_offset;
@@ -1952,7 +1952,7 @@ void Rasterizer::Draw(XyBitmap* bitmap, SharedPtrOverlay overlay, const CRect& c
             const DWORD *sw = switchpts;
             for(int wt=0; wt<w; ++wt)
             {
-                if(wt+xo >= sw[1]) {while(wt+xo >= sw[1]) sw += 2; color = sw[-2];}
+                if((DWORD)(wt+xo) >= sw[1]) {while((DWORD)(wt+xo) >= sw[1]) sw += 2; color = sw[-2];}
                 DWORD temp = COMBINE_AYUV(dst_A[wt], dst_Y[wt], dst_U[wt], dst_V[wt]);
                 pixmix(&temp, color, (s[wt]*(color>>24))>>8);
                 SPLIT_AYUV(temp, dst_A+wt, dst_Y+wt, dst_U+wt, dst_V+wt);
@@ -1981,7 +1981,7 @@ void Rasterizer::FillSolidRect(SubPicDesc& spd, int x, int y, int nWidth, int nH
 
     switch (draw_method)
     {
-    case   DM::SSE2 | 0*DM::AYUV_PLANAR :
+    case DM::SSE2 | 0*DM::AYUV_PLANAR :
     {
         for (int wy=y; wy<y+nHeight; wy++) {
             DWORD* dst = (DWORD*)((BYTE*)spd.bits + spd.pitch * wy) + x;
@@ -2001,7 +2001,7 @@ void Rasterizer::FillSolidRect(SubPicDesc& spd, int x, int y, int nWidth, int nH
         }
     }
     break;
-    case   DM::SSE2 |   DM::AYUV_PLANAR :
+    case DM::SSE2 | DM::AYUV_PLANAR :
     {
         BYTE* dst = reinterpret_cast<BYTE*>(spd.bits) + spd.pitch * y + x;
         BYTE* dst_A = dst;
@@ -2014,7 +2014,7 @@ void Rasterizer::FillSolidRect(SubPicDesc& spd, int x, int y, int nWidth, int nH
         AlphaBlt(dst_A, argb>>24, 0, nHeight, nWidth, spd.pitch);
     }
     break;
-    case 0*DM::SSE2 |   DM::AYUV_PLANAR :
+    case 0*DM::SSE2 | DM::AYUV_PLANAR :
     {
         BYTE* dst = reinterpret_cast<BYTE*>(spd.bits) + spd.pitch * y + x;
         BYTE* dst_A = dst;
