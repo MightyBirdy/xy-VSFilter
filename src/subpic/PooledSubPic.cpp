@@ -58,7 +58,8 @@ bool STDMETHODCALLTYPE CPooledSubPicAllocator::InitPool( int capacity )
 
 	while(_capacity<capacity)
 	{
-		if(!(temp = DoAlloc()))
+        temp = DoAlloc();
+		if(!temp)
 		{
 			ASSERT(0);
 			return(false);
@@ -219,7 +220,8 @@ CPooledSubPic* CPooledSubPicAllocator::DoAlloc()
         return(NULL);
     }
     CPooledSubPic* temp = NULL;
-    if(!(temp = DEBUG_NEW CPooledSubPic(spd, _alpha_blt_dst_type, this)))
+    temp = DEBUG_NEW CPooledSubPic(spd, _alpha_blt_dst_type, this);
+    if(!temp)
     {
         xy_free(spd.bits);
         ASSERT(0);

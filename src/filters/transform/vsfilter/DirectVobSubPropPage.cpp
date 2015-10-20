@@ -1364,7 +1364,8 @@ bool CDVSPathsPPage::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 							bi.iImage = 0; 
 
 							LPITEMIDLIST iil;
-							if(iil = SHBrowseForFolder(&bi))
+                            iil = SHBrowseForFolder(&bi);
+							if(iil)
 							{
 								SHGetPathFromIDList(iil, pathbuff);
 								m_path.SetWindowText(pathbuff);
