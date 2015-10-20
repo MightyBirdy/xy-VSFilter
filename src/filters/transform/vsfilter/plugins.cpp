@@ -42,6 +42,9 @@
 
 using namespace DirectVobSubXyOptions;
 
+// Size of the char buffer according to VirtualDub Filters SDK doc
+#define STRING_PROC_BUFFER_SIZE 128
+
 //
 // Generic interface
 //
@@ -432,7 +435,7 @@ public:
             }
 
             void StringProc(const FilterActivation* fa, const FilterFunctions* ff, char* str) {
-                sprintf(str, " (%s)", !GetFileName().IsEmpty() ? CStringA(GetFileName()) : " (empty)");
+                sprintf_s(str, STRING_PROC_BUFFER_SIZE, " (%s)", GetFileName().IsEmpty() ? " (empty)" : CStringA(GetFileName()));
             }
 
             bool FssProc(FilterActivation* fa, const FilterFunctions* ff, char* buf, int buflen) {
@@ -471,9 +474,9 @@ public:
 
             void StringProc(const FilterActivation* fa, const FilterFunctions* ff, char* str) {
                 if (!GetFileName().IsEmpty()) {
-                    sprintf(str, " (%s, %d)", CStringA(GetFileName()), GetCharSet());
+                    sprintf_s(str, STRING_PROC_BUFFER_SIZE, " (%s, %d)", CStringA(GetFileName()), GetCharSet());
                 } else {
-                    sprintf(str, " (empty)");
+                    sprintf_s(str, STRING_PROC_BUFFER_SIZE, " (empty)");
                 }
             }
 
@@ -699,7 +702,7 @@ public:
             }
 
             void StringProc(const VDXFilterActivation* fa, const VDXFilterFunctions* ff, char* str) {
-                sprintf(str, " (%s)", !GetFileName().IsEmpty() ? CStringA(GetFileName()) : " (empty)");
+                sprintf_s(str, STRING_PROC_BUFFER_SIZE, " (%s)", GetFileName().IsEmpty() ? " (empty)" : CStringA(GetFileName()));
             }
 
             bool FssProc(VDXFilterActivation* fa, const VDXFilterFunctions* ff, char* buf, int buflen) {
@@ -744,9 +747,9 @@ public:
 
             void StringProc(const VDXFilterActivation* fa, const VDXFilterFunctions* ff, char* str) {
                 if (!GetFileName().IsEmpty()) {
-                    sprintf(str, " (%s, %d)", CStringA(GetFileName()), GetCharSet());
+                    sprintf_s(str, STRING_PROC_BUFFER_SIZE, " (%s, %d)", CStringA(GetFileName()), GetCharSet());
                 } else {
-                    sprintf(str, " (empty)");
+                    sprintf_s(str, STRING_PROC_BUFFER_SIZE, " (empty)");
                 }
             }
 
