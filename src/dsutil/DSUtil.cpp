@@ -881,14 +881,14 @@ bool GetKeyFrames(CString fn, CUIntArray& kfs)
 				if(afi.dwCaps&AVIFILECAPS_ALLKEYFRAMES)
 				{
 					kfs.SetSize(si.dwLength);
-					for(int kf = 0; kf < si.dwLength; kf++) kfs[kf] = kf;
+					for(DWORD kf = 0; kf < si.dwLength; kf++) kfs[kf] = kf;
 				}
 				else
 				{
-					for(int kf = 0; ; kf++)
+					for(LONG kf = 0; ; kf++)
 					{
 						kf = pavi->FindSample(kf, FIND_KEY|FIND_NEXT);
-						if(kf < 0 || kfs.GetCount() > 0 && kfs[kfs.GetCount()-1] >= kf) break;
+						if(kf < 0 || kfs.GetCount() > 0 && kfs[kfs.GetCount()-1] >= (UINT)kf) break;
 						kfs.Add(kf);
 					}
 

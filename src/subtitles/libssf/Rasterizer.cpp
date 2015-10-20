@@ -688,13 +688,13 @@ namespace ssf
 				if(fSSE2) 
 				for(int wt=0; wt<w; ++wt)
 				{
-					if(wt+xo >= sw[1]) {while(wt+xo >= sw[1]) sw += 2; color = sw[-2];}
+					if((DWORD)(wt+xo) >= sw[1]) {while((DWORD)(wt+xo) >= sw[1]) sw += 2; color = sw[-2];}
 					pixmix_sse2(&dst[wt], color, src[wt*4]);
 				}
 				else
 				for(int wt=0; wt<w; ++wt)
 				{
-					if(wt+xo >= sw[1]) {while(wt+xo >= sw[1]) sw += 2; color = sw[-2];}
+					if((DWORD)(wt+xo) >= sw[1]) {while((DWORD)(wt+xo) >= sw[1]) sw += 2; color = sw[-2];}
 					pixmix_c(&dst[wt], color, src[wt*4]);
 				}
 			}

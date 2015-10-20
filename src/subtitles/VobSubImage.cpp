@@ -494,7 +494,7 @@ static bool FitLine(COutline& o, int& start, int& end)
 
 	CUIntArray la, ra;
 
-	int i, j, k;
+	UINT i, j, k;
 
 	for(i = start+1, j = end, k = start; i <= j; i++)
 	{
@@ -523,7 +523,7 @@ static bool FitLine(COutline& o, int& start, int& end)
 
 	int sum = 0;
 
-	for(i = 0, j = INT_MAX, k = 0; i < len; i++)
+	for(i = 0, j = INT_MAX, k = 0; i < (UINT)len; i++)
 	{
 		if(j > a[i]) j = a[i];
 		if(k < a[i]) k = a[i];
@@ -827,12 +827,12 @@ int CVobSubImage::GrabSegment(int start, COutline& o, COutline& ret)
 
 void CVobSubImage::SplitOutline(COutline& o, COutline& o1, COutline& o2)
 {
-	int len = o.pa.GetCount();
+	size_t len = o.pa.GetCount();
 	if(len < 4) return;
 
 	CAtlArray<UINT> la, sa, ea;
 
-	int i, j, k;
+	size_t i, j, k;
 
 	for(i = 0, j = 0; j < len; j++)
 	{
@@ -845,8 +845,8 @@ void CVobSubImage::SplitOutline(COutline& o, COutline& o1, COutline& o2)
 		}
 	}
 
-	int maxlen = 0, maxidx = -1;
-	int maxlen2 = 0, maxidx2 = -1;
+	size_t maxlen = 0, maxidx = SIZE_T_ERROR;
+	size_t maxlen2 = 0, maxidx2 = SIZE_T_ERROR;
 
 	for(i = 0; i < la.GetCount(); i++)
 	{
@@ -862,7 +862,9 @@ void CVobSubImage::SplitOutline(COutline& o, COutline& o1, COutline& o2)
 			maxidx2 = i;
 		}
 	}
-
+    
+    ASSERT(maxidx != SIZE_T_ERROR && maxidx2 != SIZE_T_ERROR);
+    
 	if(maxlen == maxlen2) maxidx = maxidx2; // if equal choose the inner section
 
 	j = (sa[maxidx] + ea[maxidx]) >> 1, k = (sa[maxidx] + ea[maxidx] + 1) >> 1;

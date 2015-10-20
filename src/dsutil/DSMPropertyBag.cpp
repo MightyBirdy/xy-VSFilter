@@ -188,7 +188,7 @@ STDMETHODIMP IDSMResourceBagImpl::ResGet(DWORD iIndex, BSTR* ppName, BSTR* ppDes
 {
 	if(ppData) CheckPointer(pDataLen, E_POINTER);
 
-	if((INT_PTR)iIndex >= m_resources.GetCount())
+	if(iIndex >= m_resources.GetCount())
 		return E_INVALIDARG;
 
 	CDSMResource& r = m_resources[iIndex];
@@ -204,7 +204,7 @@ STDMETHODIMP IDSMResourceBagImpl::ResGet(DWORD iIndex, BSTR* ppName, BSTR* ppDes
 
 STDMETHODIMP IDSMResourceBagImpl::ResSet(DWORD iIndex, LPCWSTR pName, LPCWSTR pDesc, LPCWSTR pMime, BYTE* pData, DWORD len, DWORD_PTR tag)
 {
-	if((INT_PTR)iIndex >= m_resources.GetCount())
+	if(iIndex >= m_resources.GetCount())
 		return E_INVALIDARG;
 
 	CDSMResource& r = m_resources[iIndex];
@@ -225,7 +225,7 @@ STDMETHODIMP IDSMResourceBagImpl::ResAppend(LPCWSTR pName, LPCWSTR pDesc, LPCWST
 
 STDMETHODIMP IDSMResourceBagImpl::ResRemoveAt(DWORD iIndex)
 {
-	if((INT_PTR)iIndex >= m_resources.GetCount())
+	if(iIndex >= m_resources.GetCount())
 		return E_INVALIDARG;
 
 	m_resources.RemoveAt(iIndex);
@@ -304,7 +304,7 @@ STDMETHODIMP_(DWORD) IDSMChapterBagImpl::ChapGetCount()
 
 STDMETHODIMP IDSMChapterBagImpl::ChapGet(DWORD iIndex, REFERENCE_TIME* prt, BSTR* ppName)
 {
-	if((INT_PTR)iIndex >= m_chapters.GetCount())
+	if(iIndex >= m_chapters.GetCount())
 		return E_INVALIDARG;
 
 	CDSMChapter& c = m_chapters[iIndex];
@@ -317,7 +317,7 @@ STDMETHODIMP IDSMChapterBagImpl::ChapGet(DWORD iIndex, REFERENCE_TIME* prt, BSTR
 
 STDMETHODIMP IDSMChapterBagImpl::ChapSet(DWORD iIndex, REFERENCE_TIME rt, LPCWSTR pName)
 {
-	if((INT_PTR)iIndex >= m_chapters.GetCount())
+	if(iIndex >= m_chapters.GetCount())
 		return E_INVALIDARG;
 
 	CDSMChapter& c = m_chapters[iIndex];
@@ -337,7 +337,7 @@ STDMETHODIMP IDSMChapterBagImpl::ChapAppend(REFERENCE_TIME rt, LPCWSTR pName)
 
 STDMETHODIMP IDSMChapterBagImpl::ChapRemoveAt(DWORD iIndex)
 {
-	if((INT_PTR)iIndex >= m_chapters.GetCount())
+	if(iIndex >= m_chapters.GetCount())
 		return E_INVALIDARG;
 
 	m_chapters.RemoveAt(iIndex);
