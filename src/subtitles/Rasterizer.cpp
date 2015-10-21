@@ -1692,7 +1692,7 @@ SharedPtrByte Rasterizer::CompositeAlphaMask(const SharedPtrOverlay& overlay, co
     if(w <= 0 || h <= 0) return(result);
     outputDirtyRect->SetRect(x, y, x+w, y+h);
 
-    bool fSingleColor = (switchpts[1]==0xffffffff);
+    bool fSingleColor = (switchpts[1]==DWORD_MAX);
 
     // draw
     // Grab the first colour
@@ -1775,7 +1775,7 @@ void Rasterizer::Draw(XyBitmap* bitmap, SharedPtrOverlay overlay, const CRect& c
 
     // CPUID from VDub
     bool fSSE2 = !!(g_cpuid.m_flags & CCpuID::sse2);
-    bool fSingleColor = (switchpts[1]==0xffffffff);
+    bool fSingleColor = (switchpts[1]==DWORD_MAX);
     bool PLANAR = (bitmap->type==XyBitmap::PLANNA);
     int draw_method = 0;
     if(fSingleColor)
