@@ -280,7 +280,7 @@ LRESULT CSystrayWindow::OnNotifyIcon(WPARAM wParam, LPARAM lParam)
 				
 				for(UINT i = 0; i < cStreams; i++)
 				{
-					WCHAR* pName = NULL;
+					WCHAR* pName = nullptr;
 
 					if(S_OK == pStreams[j]->Info(i, 0, &flags, 0, &group, &pName, 0, 0))
 					{
@@ -355,13 +355,13 @@ DWORD CALLBACK SystrayThreadProc(void* pParam)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	CSystrayWindow wnd((SystrayIconData*)pParam);
-	if(!wnd.CreateEx(0, AfxRegisterWndClass(0), _T("DVSWND"), WS_OVERLAPPED, CRect(0, 0, 0, 0), NULL, 0, NULL))
+	if(!wnd.CreateEx(0, AfxRegisterWndClass(0), _T("DVSWND"), WS_OVERLAPPED, CRect(0, 0, 0, 0), nullptr, 0, nullptr))
 		return -1;
 
 	((SystrayIconData*)pParam)->hSystrayWnd = wnd.m_hWnd;
 
 	MSG msg;
-	while(GetMessage(&msg, NULL/*wnd.m_hWnd*/, 0, 0))
+	while(GetMessage(&msg, nullptr/*wnd.m_hWnd*/, 0, 0))
 	{
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
@@ -378,10 +378,10 @@ static TCHAR* CallPPage(IFilterGraph* pGraph, int idx, HWND hWnd)
 	int i = 0;
 	//bool fFound = false;
 
-	WCHAR* wstr = NULL;
+	CStringW name;
 	CComPtr<IBaseFilter> pFilter;
 	CAUUID caGUID;
-	caGUID.pElems = NULL;
+	caGUID.pElems = nullptr;
 
 	BeginEnumFilters(pGraph, pEF, pBF)
 	{
@@ -392,7 +392,7 @@ static TCHAR* CallPPage(IFilterGraph* pGraph, int idx, HWND hWnd)
 		{ 
 			pFilter = pBF;
 			pSPS->GetPages(&caGUID);
-			wstr = _wcsdup(CStringW(GetFilterName(pBF))); // double char-wchar conversion happens in the non-unicode build, but anyway... :)
+			name = GetFilterName(pBF);
 			break;
 		}
 
@@ -400,7 +400,7 @@ static TCHAR* CallPPage(IFilterGraph* pGraph, int idx, HWND hWnd)
 	}
 	EndEnumFilters
 
-	TCHAR* ret = NULL;
+	TCHAR* ret = nullptr;
 
 	if(pFilter)
 	{
@@ -410,14 +410,13 @@ static TCHAR* CallPPage(IFilterGraph* pGraph, int idx, HWND hWnd)
 		}
 		else
 		{
-            ret = DEBUG_NEW TCHAR[wcslen(wstr)+1];
+            ret = DEBUG_NEW TCHAR[name.GetLength() + 1];
 			if(ret)
-				_tcscpy(ret, CString(wstr));
+				_tcscpy_s(ret, name.GetLength() + 1, CString(name));
 		}
 	}
 
 	if(caGUID.pElems) CoTaskMemFree(caGUID.pElems);
-	if(wstr) free(wstr);
 
 	return(ret);
 }
