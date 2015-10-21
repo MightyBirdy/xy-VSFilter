@@ -1480,7 +1480,7 @@ CRectCoor2 CLine::PaintAll( CompositeDrawItemList* output, const CRectCoor2& cli
             DWORD a = 0xff - w->m_style.get().alpha[3];
             if(alpha > 0) a = MulDiv(a, 0xff - alpha, 0xff);
             COLORREF shadow = revcolor(w->m_style.get().colors[3]) | (a<<24);
-            DWORD sw[6] = {shadow, -1};
+            DWORD sw[6] = {shadow, DWORD_MAX};
             sw[0] = XySubRenderFrameCreater::GetDefaultCreater()->TransColor(sw[0]);
             if(w->m_style.get().borderStyle == 0)
             {
@@ -1503,7 +1503,7 @@ CRectCoor2 CLine::PaintAll( CompositeDrawItemList* output, const CRectCoor2& cli
             DWORD aoutline = w->m_style.get().alpha[2];
             if(alpha > 0) aoutline += MulDiv(alpha, 0xff - w->m_style.get().alpha[2], 0xff);
             COLORREF outline = revcolor(w->m_style.get().colors[2]) | ((0xff-aoutline)<<24);
-            DWORD sw[6] = {outline, -1};
+            DWORD sw[6] = {outline, DWORD_MAX};
             sw[0] = XySubRenderFrameCreater::GetDefaultCreater()->TransColor(sw[0]);
             if(w->m_style.get().borderStyle == 0)
             {

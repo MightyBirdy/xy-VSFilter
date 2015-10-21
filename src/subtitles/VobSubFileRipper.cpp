@@ -485,8 +485,8 @@ DWORD CVobSubFileRipper::ThreadProc()
 			break;
 
 		default:
-		    Reply(E_FAIL);
-			return -1;
+		    Reply((DWORD)E_FAIL);
+			return DWORD_ERROR;
 		}
 
 		m_fBreakThread = false;
