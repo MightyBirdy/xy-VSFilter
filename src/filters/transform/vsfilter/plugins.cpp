@@ -196,7 +196,7 @@ public:
         if(!m_simple_provider)
         {
             HRESULT hr;
-            if(!(m_simple_provider = new SimpleSubPicProvider2(dst.type, size, size, CRect(CPoint(0,0), size), this, &hr)) || FAILED(hr))
+            if(!(m_simple_provider = DEBUG_NEW SimpleSubPicProvider2(dst.type, size, size, CRect(CPoint(0,0), size), this, &hr)) || FAILED(hr))
             {
                 m_simple_provider = NULL;
                 return(false);
@@ -318,7 +318,7 @@ public:
 		SetFileName(_T(""));
 		m_pSubPicProvider = NULL;
 
-		if(CVobSubFile* vsf = new CVobSubFile(&m_csSubLock))
+		if(CVobSubFile* vsf = DEBUG_NEW CVobSubFile(&m_csSubLock))
 		{
 			m_pSubPicProvider = (ISubPicProvider*)vsf;
 			if(vsf->Open(CString(fn))) SetFileName(fn);
@@ -350,7 +350,7 @@ public:
 
 		if(!m_pSubPicProvider)
 		{
-			if(ssf::CRenderer* ssf = new ssf::CRenderer(&m_csSubLock))
+			if(ssf::CRenderer* ssf = DEBUG_NEW ssf::CRenderer(&m_csSubLock))
 			{
 				m_pSubPicProvider = (ISubPicProvider*)ssf;
 				if(ssf->Open(CString(fn))) SetFileName(fn);
@@ -360,7 +360,7 @@ public:
 
 		if(!m_pSubPicProvider)
 		{
-			if(CRenderedTextSubtitle* rts = new CRenderedTextSubtitle(&m_csSubLock))
+			if(CRenderedTextSubtitle* rts = DEBUG_NEW CRenderedTextSubtitle(&m_csSubLock))
 			{
 				m_pSubPicProvider = (ISubPicProvider*)rts;
 				if(rts->Open(CString(fn), CharSet)) SetFileName(fn);
@@ -1164,7 +1164,7 @@ public:
             };
             AVSValue clip(env->Invoke("Blackness", value, nom));
             env->SetVar(env->SaveString("RGBA"), true);
-            //return (DNew CTextSubAvisynthFilter(clip.AsClip(), env, args[0].AsString()));
+            //return (DEBUG_NEW CTextSubAvisynthFilter(clip.AsClip(), env, args[0].AsString()));
             return (DEBUG_NEW CTextSubAvisynthFilter(
                         clip.AsClip(),
                         env,
