@@ -88,7 +88,7 @@ CDirectVobSubFilter::CDirectVobSubFilter(LPUNKNOWN punk, HRESULT* phr, const GUI
 	m_tbid.fShowIcon = (theApp.m_AppName.Find(_T("zplayer"), 0) < 0 || !!theApp.GetProfileInt(ResStr(IDS_R_GENERAL), ResStr(IDS_RG_ENABLEZPICON), 0));
 
 	HRESULT hr = S_OK;
-	m_pTextInput.Add(new CTextInputPin(this, m_pLock, &m_csSubLock, &hr));
+	m_pTextInput.Add(DEBUG_NEW CTextInputPin(this, m_pLock, &m_csSubLock, &hr));
 	ASSERT(SUCCEEDED(hr));
 
     m_frd.ThreadStartedEvent.Create(0, FALSE, FALSE, 0);
@@ -737,7 +737,7 @@ void CDirectVobSubFilter::InitSubPicQueue()
 	//m_pSubPicQueue = m_fDoPreBuffering
 	//	? (ISubPicQueue*)new CSubPicQueue(MAX_SUBPIC_QUEUE_LENGTH, pSubPicAllocator, &hr)
 	//	: (ISubPicQueue*)new CSubPicQueueNoThread(pSubPicAllocator, &hr);
-    m_simple_provider = new SimpleSubPicProvider2(m_spd.type, CSize(m_w, m_h), window, video_rect, this, &hr);
+    m_simple_provider = DEBUG_NEW SimpleSubPicProvider2(m_spd.type, CSize(m_w, m_h), window, video_rect, this, &hr);
 
 	if(FAILED(hr)) m_simple_provider = NULL;
 
@@ -1729,7 +1729,7 @@ bool CDirectVobSubFilter::Open()
         {
 //            CAutoTiming t(TEXT("CRenderedTextSubtitle::Open"), 0);
             XY_AUTO_TIMING(TEXT("CRenderedTextSubtitle::Open"));
-            CAutoPtr<CRenderedTextSubtitle> pRTS(new CRenderedTextSubtitle(&m_csSubLock));
+            CAutoPtr<CRenderedTextSubtitle> pRTS(DEBUG_NEW CRenderedTextSubtitle(&m_csSubLock));
             if(pRTS && pRTS->Open(ret[i].full_file_name, DEFAULT_CHARSET) && pRTS->GetStreamCount() > 0)
             {
                 pSubStream = pRTS.Detach();
@@ -1740,7 +1740,7 @@ bool CDirectVobSubFilter::Open()
 		if(!pSubStream)
 		{
             CAutoTiming t(TEXT("CVobSubFile::Open"), 0);
-			CAutoPtr<CVobSubFile> pVSF(new CVobSubFile(&m_csSubLock));
+			CAutoPtr<CVobSubFile> pVSF(DEBUG_NEW CVobSubFile(&m_csSubLock));
 			if(pVSF && pVSF->Open(ret[i].full_file_name) && pVSF->GetStreamCount() > 0)
 			{
 				pSubStream = pVSF.Detach();
@@ -1751,7 +1751,7 @@ bool CDirectVobSubFilter::Open()
 		if(!pSubStream)
 		{
             CAutoTiming t(TEXT("ssf::CRenderer::Open"), 0);
-			CAutoPtr<ssf::CRenderer> pSSF(new ssf::CRenderer(&m_csSubLock));
+			CAutoPtr<ssf::CRenderer> pSSF(DEBUG_NEW ssf::CRenderer(&m_csSubLock));
 			if(pSSF && pSSF->Open(ret[i].full_file_name) && pSSF->GetStreamCount() > 0)
 			{
 				pSubStream = pSSF.Detach();
@@ -2004,7 +2004,7 @@ void CDirectVobSubFilter::AddSubStream(ISubStream* pSubStream)
 	if(len == 0)
 	{
 		HRESULT hr = S_OK;
-		m_pTextInput.Add(new CTextInputPin(this, m_pLock, &m_csSubLock, &hr));
+		m_pTextInput.Add(DEBUG_NEW CTextInputPin(this, m_pLock, &m_csSubLock, &hr));
 	}
 }
 

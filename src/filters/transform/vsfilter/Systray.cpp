@@ -400,7 +400,7 @@ static TCHAR* CallPPage(IFilterGraph* pGraph, int idx, HWND hWnd)
 		}
 		else
 		{
-            ret = new TCHAR[wcslen(wstr)+1];
+            ret = DEBUG_NEW TCHAR[wcslen(wstr)+1];
 			if(ret)
 				_tcscpy(ret, CString(wstr));
 		}
