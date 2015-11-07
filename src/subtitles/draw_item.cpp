@@ -8,12 +8,6 @@
 #include "../SubPic/ISubPic.h"
 #include "xy_bitmap.h"
 
-#if ENABLE_XY_LOG_TRACE_DRAW
-#  define TRACE_DRAW(msg) XY_LOG_TRACE(msg)
-#else
-#  define TRACE_DRAW(msg)
-#endif
-
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////////
@@ -48,12 +42,6 @@ CRectCoor2 DrawItem::GetDirtyRect()
 
 CRectCoor2 DrawItem::Draw( XyBitmap* bitmap, DrawItem& draw_item, const CRectCoor2& clip_rect )
 {
-    return draw_item.use_addition_draw ? AdditionDraw(bitmap, draw_item, clip_rect) 
-                                       : AlphaBltDraw(bitmap, draw_item, clip_rect);
-}
-
-CRectCoor2 DrawItem::AlphaBltDraw( XyBitmap* bitmap, DrawItem& draw_item, const CRectCoor2& clip_rect )
-{
     CRect result;
     SharedPtrGrayImage2 alpha_mask;
     draw_item.clipper->Paint(&alpha_mask);
@@ -67,9 +55,8 @@ CRectCoor2 DrawItem::AlphaBltDraw( XyBitmap* bitmap, DrawItem& draw_item, const 
     const SharedPtrByte& alpha = Rasterizer::CompositeAlphaMask(overlay, draw_item.clip_rect & clip_rect, alpha_mask.get(),
         draw_item.xsub, draw_item.ysub, draw_item.switchpts, draw_item.fBody, draw_item.fBorder,
         &result, &ret_val);
-
     if (ret_val) {
-        TRACE(_T("Error in DrawItem::AlphaBltDraw: alpha memory allocation failed!"));
+        TRACE(_T("Error in DrawItem::Draw: alpha memory allocation failed!"));
         return nullptr;
     }
 
@@ -78,50 +65,21 @@ CRectCoor2 DrawItem::AlphaBltDraw( XyBitmap* bitmap, DrawItem& draw_item, const 
     return result;
 }
 
-CRectCoor2 DrawItem::AdditionDraw( XyBitmap *bitmap, DrawItem& draw_item, const CRectCoor2& clip_rect )
-{
-    TRACE_DRAW("AdditionDraw");
-    CRect result;
-    SharedPtrGrayImage2 alpha_mask;
-    draw_item.clipper->Paint(&alpha_mask);
-
-    SharedPtrOverlay overlay;
-    ASSERT(draw_item.overlay_paint_machine);
-    draw_item.overlay_paint_machine->Paint(&overlay);
-
-    unsigned int ret_val = 0;
-
-    const SharedPtrByte& alpha = Rasterizer::CompositeAlphaMask(overlay, draw_item.clip_rect & clip_rect, alpha_mask.get(),
-        draw_item.xsub, draw_item.ysub, draw_item.switchpts, draw_item.fBody, draw_item.fBorder,
-        &result, &ret_val);
-
-    if (ret_val) {
-        TRACE(_T("Error in DrawItem::AlphaBltDraw: alpha memory allocation failed!"));
-        return nullptr;
-    }
-
-    Rasterizer::AdditionDraw(bitmap, overlay, result, alpha.get(),
-        draw_item.xsub, draw_item.ysub, draw_item.switchpts, draw_item.fBody, draw_item.fBorder);
-    return result;
-}
-
 DrawItem* DrawItem::CreateDrawItem( const SharedPtrOverlayPaintMachine& overlay_paint_machine, const CRect& clipRect,
     const SharedPtrCClipperPaintMachine &clipper, int xsub, int ysub, const DWORD* switchpts, bool fBody, bool fBorder )
 {
-    DrawItem* result              = DEBUG_NEW DrawItem();
+    DrawItem* result = new DrawItem();
     result->overlay_paint_machine = overlay_paint_machine;
-    result->clip_rect             = clipRect;
-    result->clipper               = clipper;
-    result->xsub                  = xsub;
-    result->ysub                  = ysub;
+    result->clip_rect = clipRect;
+    result->clipper = clipper;
+    result->xsub = xsub;
+    result->ysub = ysub;
 
     memcpy(result->switchpts, switchpts, sizeof(result->switchpts));
-    result->fBody   = fBody;
+    result->fBody = fBody;
     result->fBorder = fBorder;
 
-    result->use_addition_draw = false;
-
-    result->m_key.reset( DEBUG_NEW DrawItemHashKey(*result) );
+    result->m_key.reset( new DrawItemHashKey(*result) );
     result->m_key->UpdateHashValue();
 
     return result;
@@ -139,7 +97,7 @@ const SharedPtrDrawItemHashKey& DrawItem::GetHashKey()
 
 CRectCoor2 CompositeDrawItem::GetDirtyRect( CompositeDrawItem& item )
 {
-    CRectCoor2 result;
+    CRectCoor2 result;    
     if (item.shadow)
     {
         result |= item.shadow->GetDirtyRect();
@@ -194,7 +152,6 @@ void MergeRects(const XyRectExList& input, XyRectExList* output);
 void CreateDrawItemExTree( CompositeDrawItemListList& input, 
     CompositeDrawItemExTree *out_draw_item_ex_tree, 
     XyRectExList *out_rect_ex_list );
-void DecideDrawMethod( CompositeDrawItemListList& compDrawItemListList, XyRectExList& rect_ex_list );
 
 void CompositeDrawItem::Draw( XySubRenderFrame**output, CompositeDrawItemListList& compDrawItemListList )
 {
@@ -207,9 +164,6 @@ void CompositeDrawItem::Draw( XySubRenderFrame**output, CompositeDrawItemListLis
     CompositeDrawItemExTree draw_item_ex_tree;
     XyRectExList rect_ex_list;
     CreateDrawItemExTree(compDrawItemListList, &draw_item_ex_tree, &rect_ex_list);
-
-    //fix subpixel gap whenever possible
-    DecideDrawMethod(compDrawItemListList, rect_ex_list);
 
     XyRectExList grouped_rect_exs;
     MergeRects(rect_ex_list, &grouped_rect_exs);
@@ -274,12 +228,12 @@ void CompositeDrawItem::Draw( XySubRenderFrame**output, CompositeDrawItemListLis
                     int id = draw_item_ex.rect_id_list.GetNext(pos);
                     grouped_draw_items[id].draw_item_list.AddTail( draw_item_ex.item->body );
                 }
-            }
+            }            
         }
     }
 
     XySubRenderFrameCreater *render_frame_creater = XySubRenderFrameCreater::GetDefaultCreater();
-
+    
     *output = render_frame_creater->NewXySubRenderFrame(grouped_draw_items.GetCount());
     XySubRenderFrame& sub_render_frame = **output;
 
@@ -307,13 +261,13 @@ void CreateDrawItemExTree( CompositeDrawItemListList& input,
         POSITION item_pos = compDrawItemList.GetHeadPosition();
         for (int item_id=0; item_id<count; item_id++ )
         {
-            CompositeDrawItem& comp_draw_item = compDrawItemList.GetNext(item_pos);
+            CompositeDrawItem& comp_draw_item = compDrawItemList.GetNext(item_pos);            
             CompositeDrawItemEx& comp_draw_item_ex = out_draw_item_exs.GetAt(item_id);
             comp_draw_item_ex.item = &comp_draw_item;
             comp_draw_item_ex.rect_id_list.AddHead(-1);//dummy head
 
             XyRectEx &rect_ex = out_rect_ex_list->GetAt(out_rect_ex_list->AddTail());
-            rect_ex.item_ex_list.reset(DEBUG_NEW PCompositeDrawItemExList());
+            rect_ex.item_ex_list.reset(new PCompositeDrawItemExList());
             rect_ex.item_ex_list->AddTail( &comp_draw_item_ex);
             rect_ex.SetRect( CompositeDrawItem::GetDirtyRect(comp_draw_item) );
         }
@@ -366,7 +320,7 @@ void MergeRects(const XyRectExList& input, XyRectExList* output)
             Segment& seg = tempSegments[count];
             seg.AddTail();
             seg.GetTail().SetRect(INT_MIN, prev, INT_MIN, vertical_breakpoints[ptr]);
-            seg.GetTail().item_ex_list.reset(DEBUG_NEW PCompositeDrawItemExList());
+            seg.GetTail().item_ex_list.reset(new PCompositeDrawItemExList());
 
             prev = vertical_breakpoints[ptr];
             count++;
@@ -404,7 +358,7 @@ void MergeRects(const XyRectExList& input, XyRectExList* output)
                 cur_line.AddTail();
                 XyRectEx & new_item = cur_line.GetTail();
                 new_item.SetRect( rect.left, item.top, rect.right, item.bottom );
-                new_item.item_ex_list.reset(DEBUG_NEW PCompositeDrawItemExList());
+                new_item.item_ex_list.reset(new PCompositeDrawItemExList());
                 new_item.item_ex_list->AddTailList( rect.item_ex_list.get() );
             }
             else
@@ -469,62 +423,6 @@ void MergeRects(const XyRectExList& input, XyRectExList* output)
     }
 }
 
-void DecideDrawMethod( CompositeDrawItemListList& compDrawItemListList, XyRectExList& rect_ex_list )
-{
-    int count = rect_ex_list.GetCount();
-    if (count>128)//this implementation is too slow for input of large scale
-    {
-        return;
-    }
-    bool not_lowest[128];
-    memset(not_lowest, 0, sizeof(not_lowest));
-
-    int list_count = compDrawItemListList.GetCount();
-    POSITION list_pos = compDrawItemListList.GetHeadPosition();
-    POSITION rect_pos = rect_ex_list.GetHeadPosition();
-    bool *not_lowest1 = not_lowest;
-    for (;list_pos;)
-    {
-        CompositeDrawItemList& compDrawItemList = compDrawItemListList.GetNext(list_pos);
-        POSITION item_pos = compDrawItemList.GetHeadPosition();
-        for (; item_pos; )
-        {
-            CompositeDrawItem& comp_draw_item = compDrawItemList.GetNext(item_pos);
-            XyRectEx &rect_ex = rect_ex_list.GetNext(rect_pos);
-
-            POSITION pos = rect_pos;
-            bool *not_lowest2 = not_lowest1;
-            while(pos)
-            {
-                XyRectEx &rect_ex2 = rect_ex_list.GetNext(pos);
-                not_lowest2++;
-                if (!*not_lowest2)
-                {
-                    if (!(rect_ex.left  >= rect_ex2.right || 
-                          rect_ex.right <= rect_ex2.left  || 
-                          rect_ex.top   >= rect_ex2.bottom||
-                          rect_ex.bottom<= rect_ex2.top))
-                    {
-                        *not_lowest2 = true;
-                    }
-                }
-            }
-            if (!*not_lowest1)
-            {
-                if (comp_draw_item.shadow ) comp_draw_item.shadow->use_addition_draw  = true;
-                int n = !!comp_draw_item.body + !!comp_draw_item.outline + !!comp_draw_item.shadow;
-                if (n==1 || 
-                    (!comp_draw_item.shadow && comp_draw_item.outline && !comp_draw_item.outline->fBody))
-                {
-                    if (comp_draw_item.body   ) comp_draw_item.body->use_addition_draw    = true;
-                    if (comp_draw_item.outline) comp_draw_item.outline->use_addition_draw = true;
-                }
-            }
-            not_lowest1++;
-        }
-    }
-}
-
 //////////////////////////////////////////////////////////////////////////
 //
 // GroupedDrawItems
@@ -534,7 +432,7 @@ void GroupedDrawItems::Draw( SharedPtrXyBitmap *bitmap, int *bitmap_identity_num
 {
     ASSERT(bitmap && bitmap_identity_num);
     BitmapMruCache *bitmap_cache = CacheManager::GetBitmapMruCache();
-    GroupedDrawItemsHashKey *key = DEBUG_NEW GroupedDrawItemsHashKey();
+    GroupedDrawItemsHashKey *key = new GroupedDrawItemsHashKey();
     CreateHashKey(key);
     XyFwGroupedDrawItemsHashKey::IdType key_id = XyFwGroupedDrawItemsHashKey(key).GetId();
     POSITION pos = bitmap_cache->Lookup( key_id );
@@ -543,13 +441,10 @@ void GroupedDrawItems::Draw( SharedPtrXyBitmap *bitmap, int *bitmap_identity_num
         POSITION pos = draw_item_list.GetHeadPosition();
         XyBitmap *tmp = XySubRenderFrameCreater::GetDefaultCreater()->CreateBitmap(clip_rect);
         bitmap->reset(tmp);
-
         while(pos)
         {
-            DrawItem& item = *draw_item_list.GetNext(pos);
-            DrawItem::Draw(tmp, item, clip_rect);
+            DrawItem::Draw(tmp, *draw_item_list.GetNext(pos), clip_rect);
         }
-        
         bitmap_cache->UpdateCache(key_id, *bitmap);
     }
     else
@@ -564,7 +459,7 @@ void GroupedDrawItems::CreateHashKey(GroupedDrawItemsHashKey *key)
 {
     ASSERT(key);
     key->m_clip_rect = clip_rect;
-    GroupedDrawItemsHashKey::Keys *inner_key = DEBUG_NEW GroupedDrawItemsHashKey::Keys();
+    GroupedDrawItemsHashKey::Keys *inner_key = new GroupedDrawItemsHashKey::Keys();
     ASSERT(inner_key);
     key->m_key.reset(inner_key);
     inner_key->SetCount(draw_item_list.GetCount());
@@ -575,3 +470,4 @@ void GroupedDrawItems::CreateHashKey(GroupedDrawItemsHashKey *key)
     }
     key->UpdateHashValue();
 }
+
