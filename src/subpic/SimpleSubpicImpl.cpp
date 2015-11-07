@@ -491,7 +491,7 @@ void SimpleSubpic::SubsampleAndInterlace( int index, Bitmap*bitmap, bool u_first
 
     //Todo: fix me. 
     //Walkarround for alignment
-    if ( ((bitmap->pitch | (int)u_start | (int)v_start)&15) == 0 && (g_cpuid.m_flags & CCpuID::sse2) ) 
+    if ( ((bitmap->pitch | (unsigned __int64)u_start | (unsigned __int64)v_start)&15) == 0 && (g_cpuid.m_flags & CCpuID::sse2) ) 
     {
         for (int i=0;i<h;i+=2)
         {

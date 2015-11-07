@@ -59,7 +59,7 @@ void XyBitmap::ClearBitmap( XyBitmap *bitmap )
     }
     else
     {
-        BYTE * p = bitmap->plans[0];
+        BYTE*  p = bitmap->plans[0];
         for (int i=0;i<bitmap->h;i++, p+=bitmap->pitch)
         {
             memsetd(p, 0xFF000000, bitmap->w*4);

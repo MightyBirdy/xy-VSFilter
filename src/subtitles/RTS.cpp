@@ -1226,7 +1226,7 @@ GrayImage2* CClipper::PaintBaseClipper()
     result->size = m_size;
     result->left_top.SetPoint(0, 0);
 
-    BYTE * result_data = result->data.get();
+    BYTE*  result_data = result->data.get();
     if(!result_data)
     {
         delete result;
@@ -3157,8 +3157,8 @@ STDMETHODIMP_(POSITION) CRenderedTextSubtitle::GetStartPosition(REFERENCE_TIME r
 
 STDMETHODIMP_(POSITION) CRenderedTextSubtitle::GetNext(POSITION pos)
 {
-    int iSegment = ((int)pos>>RTS_POS_SEGMENT_INDEX_BITS);
-    int subIndex = ((int)pos & RTS_POS_SUB_INDEX_MASK);
+    int iSegment = ((__int64)pos>>RTS_POS_SEGMENT_INDEX_BITS);
+    int subIndex = ((__int64)pos & RTS_POS_SUB_INDEX_MASK);
     const STSSegment *stss = GetSegment(iSegment);
     ASSERT(stss!=NULL && stss->subs.GetCount()>0);
     //DbgLog((LOG_TRACE, 3, "stss:%x count:%d", stss, stss->subs.GetCount()));
@@ -3191,9 +3191,9 @@ STDMETHODIMP_(POSITION) CRenderedTextSubtitle::GetNext(POSITION pos)
 //@return: <0 if segment not found
 STDMETHODIMP_(REFERENCE_TIME) CRenderedTextSubtitle::GetStart(POSITION pos, double fps)
 {
-    //return(10000i64 * TranslateSegmentStart((int)pos-1, fps));
-    int iSegment = ((int)pos>>RTS_POS_SEGMENT_INDEX_BITS);
-    int subIndex = ((int)pos & RTS_POS_SUB_INDEX_MASK);
+    //return(10000i64 * TranslateSegmentStart((__int64)pos-1, fps));
+    int iSegment = ((__int64)pos>>RTS_POS_SEGMENT_INDEX_BITS);
+    int subIndex = ((__int64)pos & RTS_POS_SUB_INDEX_MASK);
     int start = TranslateSegmentStart(iSegment, fps);
     const STSSegment *stss = GetSegment(iSegment);
     if(stss!=NULL)
@@ -3209,9 +3209,9 @@ STDMETHODIMP_(REFERENCE_TIME) CRenderedTextSubtitle::GetStart(POSITION pos, doub
 //@return: <0 if segment not found
 STDMETHODIMP_(REFERENCE_TIME) CRenderedTextSubtitle::GetStop(POSITION pos, double fps)
 {
-//  return(10000i64 * TranslateSegmentEnd((int)pos-1, fps));
-    int iSegment = ((int)pos>>RTS_POS_SEGMENT_INDEX_BITS);
-    int subIndex = ((int)pos & RTS_POS_SUB_INDEX_MASK);
+//  return(10000i64 * TranslateSegmentEnd((__int64)pos-1, fps));
+    int iSegment = ((__int64)pos>>RTS_POS_SEGMENT_INDEX_BITS);
+    int subIndex = ((__int64)pos & RTS_POS_SUB_INDEX_MASK);
     int start, end, ret;
     TranslateSegmentStartEnd(iSegment, fps, start, end);
     const STSSegment *stss = GetSegment(iSegment);
@@ -3234,8 +3234,8 @@ STDMETHODIMP_(REFERENCE_TIME) CRenderedTextSubtitle::GetStop(POSITION pos, doubl
 //@start, @stop: -1 if segment not found; @stop may < @start if subIndex exceed uppper bound
 STDMETHODIMP_(VOID) CRenderedTextSubtitle::GetStartStop(POSITION pos, double fps, /*out*/REFERENCE_TIME &start, /*out*/REFERENCE_TIME &stop)
 {
-    int iSegment = ((int)pos>>RTS_POS_SEGMENT_INDEX_BITS);
-    int subIndex = ((int)pos & RTS_POS_SUB_INDEX_MASK);
+    int iSegment = ((__int64)pos>>RTS_POS_SEGMENT_INDEX_BITS);
+    int subIndex = ((__int64)pos & RTS_POS_SUB_INDEX_MASK);
     int tempStart, tempEnd;
     TranslateSegmentStartEnd(iSegment, fps, tempStart, tempEnd);
     start = tempStart;
@@ -3262,7 +3262,7 @@ STDMETHODIMP_(VOID) CRenderedTextSubtitle::GetStartStop(POSITION pos, double fps
 
 STDMETHODIMP_(bool) CRenderedTextSubtitle::IsAnimated(POSITION pos)
 {
-    unsigned int iSegment = ((unsigned int)pos>>RTS_POS_SEGMENT_INDEX_BITS);
+    unsigned int iSegment = ((unsigned __int64)pos>>RTS_POS_SEGMENT_INDEX_BITS);
     if(iSegment<m_segments.GetCount())
         return m_segments[iSegment].animated;
     else

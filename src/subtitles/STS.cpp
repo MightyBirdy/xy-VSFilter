@@ -266,7 +266,7 @@ static void LogSegments(const CAtlArray<STSSegment>& segments)
 static DWORD CharSetToCodePage(DWORD dwCharSet)
 {
     CHARSETINFO cs={0};
-    ::TranslateCharsetInfo((DWORD *)dwCharSet, &cs, TCI_SRCCHARSET);
+    ::TranslateCharsetInfo((DWORD*)dwCharSet, &cs, TCI_SRCCHARSET);
     return cs.ciACP;
 }
 
