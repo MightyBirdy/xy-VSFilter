@@ -25,8 +25,10 @@
 
 CVobSubImage::CVobSubImage()
 {
-	iLang = iIdx = -1;
+	nLang = SIZE_T_ERROR;
+    nIdx = SIZE_T_ERROR;
 	fForced = false;
+    bAligned = true;
 	bAnimated = false;
 	start = delay = 0;
 	rect = CRect(0,0,0,0);
@@ -76,38 +78,31 @@ void CVobSubImage::Free()
 	lpPixels = NULL;
 }
 
-bool CVobSubImage::Decode(BYTE* lpData, int packetsize, int datasize, int t,
+bool CVobSubImage::Decode(BYTE* lpData, size_t packetSize, size_t dataSize, int t,
 						  bool fCustomPal, 
 						  int tridx, 
 						  RGBQUAD* orgpal /*[16]*/, RGBQUAD* cuspal /*[4]*/,
-						  bool fTrim)
+						  bool bTrim)
 {
-	GetPacketInfo(lpData, packetsize, datasize, t);
+	GetPacketInfo(lpData, packetSize, dataSize, t);
 
 	if(!Alloc(rect.Width(), rect.Height())) return(false);
 
 	lpPixels = lpTemp1;
 
 	nPlane = 0;
-	fAligned = 1;
+    bAligned = true;
 
 	this->fCustomPal = fCustomPal;
 	this->orgpal = orgpal;
 	this->tridx = tridx;
 	this->cuspal = cuspal;
 
-	CPoint p(rect.left, rect.top);
+	CPoint p = rect.TopLeft();
 
-	int end0 = nOffset[1];
-	int end1 = datasize;
+    size_t end[] = { nOffset[1], dataSize };
 
-    // fixme: support vobsub animation
-	if (nOffset[0] > nOffset[1]) {
-		end1 = nOffset[0];
-		end0 = datasize;
-	}
-
-	while((nPlane == 0 && nOffset[0] < end0) || (nPlane == 1 && nOffset[1] < end1))
+	while (nOffset[nPlane] < end[nPlane])
 	{
 		DWORD code;
 
@@ -122,7 +117,7 @@ bool CVobSubImage::Decode(BYTE* lpData, int packetsize, int datasize, int t,
 
 		DrawPixels(p, rect.right - p.x, code & 3);
 
-		if(!fAligned) GetNibble(lpData); // align to byte
+		if(!bAligned) GetNibble(lpData); // align to byte
 
 		p.x = rect.left;
 		p.y++;
@@ -131,16 +126,16 @@ bool CVobSubImage::Decode(BYTE* lpData, int packetsize, int datasize, int t,
 
 	rect.bottom = std::min(p.y, rect.bottom);
 
-	if(fTrim) TrimSubImage();
+	if(bTrim) TrimSubImage();
 
 	return(true);
 }
 
-void CVobSubImage::GetPacketInfo(const BYTE* lpData, int packetsize, int datasize, int t /*= INT_MAX*/)
+void CVobSubImage::GetPacketInfo(const BYTE* lpData, size_t packetSize, size_t dataSize, int t /*= INT_MAX*/)
 {
 //	delay = 0;
 
-	int i, nextctrlblk = datasize;
+	size_t i, nextctrlblk = dataSize;
 	WORD pal = 0, tr = 0;
 	WORD nPal = 0, nTr = 0;
 
@@ -152,7 +147,7 @@ void CVobSubImage::GetPacketInfo(const BYTE* lpData, int packetsize, int datasiz
 		i += 2;
 		nextctrlblk = (lpData[i] << 8) | lpData[i+1]; i += 2;
 
-		if(nextctrlblk > packetsize || nextctrlblk < datasize)
+		if(nextctrlblk > packetSize || nextctrlblk < dataSize)
 		{
 			ASSERT(0);
 			return;
@@ -166,7 +161,7 @@ void CVobSubImage::GetPacketInfo(const BYTE* lpData, int packetsize, int datasiz
 
 		while(!fBreak)
 		{
-			int len = 0;
+			size_t len = 0;
 
 			switch(lpData[i])
 			{
@@ -180,7 +175,7 @@ void CVobSubImage::GetPacketInfo(const BYTE* lpData, int packetsize, int datasiz
 				default: len = 0; break;
 			}
 
-			if(i+len >= packetsize)
+			if(i+len >= packetSize)
 			{
 				TRACE(_T("Warning: Wrong subpicture parameter block ending\n"));
 				break;
@@ -230,7 +225,7 @@ void CVobSubImage::GetPacketInfo(const BYTE* lpData, int packetsize, int datasiz
 			}
 		}
 	}
-	while(i <= nextctrlblk && i < packetsize);
+	while(i <= nextctrlblk && i < packetSize);
 
 	for(i = 0; i < 4; i++) 
 	{
@@ -241,16 +236,22 @@ void CVobSubImage::GetPacketInfo(const BYTE* lpData, int packetsize, int datasiz
 	bAnimated = (nPal > 1 || nTr > 1);
 }
 
-BYTE CVobSubImage::GetNibble(BYTE* lpData)
+BYTE CVobSubImage::GetNibble(const BYTE* lpData)
 {
-	WORD& off = nOffset[nPlane];
-	BYTE ret = (lpData[off] >> (fAligned << 2)) & 0x0f;
-	fAligned = !fAligned;
-	off += fAligned;
-	return(ret);
+    size_t& off = nOffset[nPlane];
+    BYTE ret = lpData[off];
+    if (bAligned) {
+        ret >>= 4;
+    }
+    ret &= 0x0f;
+    bAligned = !bAligned;
+    if (bAligned) {
+        off++;
+    }
+    return ret;
 }
 
-void CVobSubImage::DrawPixels(CPoint p, int length, int colorid)
+void CVobSubImage::DrawPixels(CPoint p, int length, size_t colorId)
 {
 	if(length <= 0
 	|| p.x + length < rect.left
@@ -270,12 +271,12 @@ void CVobSubImage::DrawPixels(CPoint p, int length, int colorid)
 
 	if(!fCustomPal) 
 	{
-		c = orgpal[pal[colorid].pal];
-		c.rgbReserved = (pal[colorid].tr<<4)|pal[colorid].tr;
+		c = orgpal[pal[colorId].pal];
+		c.rgbReserved = (pal[colorId].tr<<4)|pal[colorId].tr;
 	}
 	else
 	{
-		c = cuspal[colorid];
+		c = cuspal[colorId];
 	}
 
 	while(length-- > 0) *ptr++ = c;

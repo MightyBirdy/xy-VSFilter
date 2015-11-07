@@ -995,7 +995,7 @@ bool Rasterizer::OldFixedPointBlur(const Overlay& input_overlay, float be_streng
         }
     }
 
-    ::boost::shared_array<unsigned> tmp_buf( DEBUG_NEW unsigned[max((output_overlay->mOverlayPitch+1)*(output_overlay->mOverlayHeight+1),0)] );
+    ::boost::shared_array<unsigned> tmp_buf( DEBUG_NEW unsigned[_MAX((output_overlay->mOverlayPitch+1)*(output_overlay->mOverlayHeight+1),0)] );
     //flyweight<key_value<int, ass_tmp_buf, ass_tmp_buf_get_size>, no_locking> tmp_buf((overlay->mOverlayWidth+1)*(overlay->mOverlayPitch+1));
     // Do some gaussian blur magic    
     if ( gaussian_blur_strength > GAUSSIAN_BLUR_THREHOLD )
@@ -1244,7 +1244,7 @@ bool Rasterizer::BeBlur( const Overlay& input_overlay, float be_strength,
     int pass_num = static_cast<int>(scaled_be_strength);
     int pitch = output_overlay->mOverlayPitch;
     byte* blur_plan = output_overlay->mfWideOutlineEmpty ? body : border;
-    ::boost::shared_array<unsigned> tmp_buf( DEBUG_NEW unsigned[max((output_overlay->mOverlayPitch+1)*(output_overlay->mOverlayHeight+1),0)] );
+    ::boost::shared_array<unsigned> tmp_buf( DEBUG_NEW unsigned[_MAX((output_overlay->mOverlayPitch+1)*(output_overlay->mOverlayHeight+1),0)] );
     for (int pass = 0; pass < pass_num; pass++)
     {
         if(output_overlay->mOverlayWidth >= 3 && output_overlay->mOverlayHeight >= 3)
@@ -1270,11 +1270,11 @@ bool Rasterizer::BeBlur( const Overlay& input_overlay, float be_strength,
 
 ///////////////////////////////////////////////////////////////////////////
 
-typedef              void (*PixMixFunc)(DWORD *dst, DWORD color, DWORD alpha);
-static __forceinline void   pixmix_c   (DWORD *dst, DWORD color, DWORD alpha);
-static __forceinline void   pixmix_sse2(DWORD *dst, DWORD color, DWORD alpha);
+typedef              void (*PixMixFunc)(DWORD* dst, DWORD color, DWORD alpha);
+static __forceinline void   pixmix_c   (DWORD* dst, DWORD color, DWORD alpha);
+static __forceinline void   pixmix_sse2(DWORD* dst, DWORD color, DWORD alpha);
 
-static __forceinline void pixmix_c(DWORD *dst, DWORD color, DWORD alpha)
+static __forceinline void pixmix_c(DWORD* dst, DWORD color, DWORD alpha)
 {
     int a = alpha;
     // Make sure both a and ia are in range 1..256 for the >>8 operations below to be correct
@@ -1303,7 +1303,7 @@ static __forceinline void pixmix_sse2(DWORD* dst, DWORD color, DWORD alpha)
 
 ///////////////////////////////////////////////////////////////////////////
 
-static __forceinline void pixmix2(DWORD *dst, DWORD color, DWORD shapealpha, DWORD clipalpha)
+static __forceinline void pixmix2(DWORD* dst, DWORD color, DWORD shapealpha, DWORD clipalpha)
 {
     int a = (((shapealpha)*(clipalpha)*(color>>24))>>12)&0xff;
     int ia = 256-a;
@@ -1339,7 +1339,7 @@ static __forceinline void  packed_pix_mix_sse2(BYTE* dst, const BYTE* alpha, int
 
 static __forceinline void packed_pix_mix_c(BYTE* dst, const BYTE* alpha, int w, DWORD color)
 {
-    DWORD * dst_w = (DWORD *)dst;
+    DWORD*  dst_w = (DWORD*)dst;
     for(int wt=0; wt<w; ++wt)
         pixmix_c(&dst_w[wt], color, alpha[wt]);
 }
@@ -1394,8 +1394,8 @@ static __forceinline void packed_pix_mix_sse2(BYTE* dst, const BYTE* alpha, int 
 
     __m128i ones = _mm_set1_epi16(0x1);
 
-    const BYTE *alpha_end0 = alpha + (w&~15);
-    const BYTE *alpha_end = alpha + w;
+    const BYTE* alpha_end0 = alpha + (w&~15);
+    const BYTE* alpha_end = alpha + w;
     for ( ; alpha<alpha_end0; alpha+=16, dst+=16*4 )
     {
         __m128i a = _mm_loadu_si128(reinterpret_cast<const __m128i*>(alpha));
@@ -1432,7 +1432,7 @@ static __forceinline void packed_pix_mix_sse2(BYTE* dst, const BYTE* alpha, int 
         _mm_storeu_si128(reinterpret_cast<__m128i*>(dst+32), d3);
         _mm_storeu_si128(reinterpret_cast<__m128i*>(dst+48), d4);
     }
-    DWORD * dst_w = reinterpret_cast<DWORD*>(dst);
+    DWORD*  dst_w = reinterpret_cast<DWORD*>(dst);
     for ( ; alpha<alpha_end; alpha++, dst_w++ )
     {
         pixmix_sse2(dst_w, color, *alpha);
@@ -1445,7 +1445,7 @@ static __forceinline void  packed_pix_mix_sse2           (BYTE* dst, BYTE alpha,
 
 static __forceinline void  packed_pix_mix_c              (BYTE* dst, BYTE alpha, int w, DWORD color)
 {
-    const BYTE *dst_end = dst + 4*w;
+    const BYTE* dst_end = dst + 4*w;
     for ( ; dst<dst_end; dst+=4 )
     {
         pixmix_c(reinterpret_cast<DWORD*>(dst), color, alpha);
@@ -1463,8 +1463,8 @@ static __forceinline void packed_pix_mix_sse2(BYTE* dst, BYTE alpha, int w, DWOR
 
     __m128i ones = _mm_set1_epi16(0x1);
 
-    const BYTE *dst_end0 = dst + ((4*w)&~63);
-    const BYTE *dst_end = dst + 4*w;
+    const BYTE* dst_end0 = dst + ((4*w)&~63);
+    const BYTE* dst_end = dst + 4*w;
     for ( ; dst<dst_end0; dst+=16*4 )
     {
         __m128i d1 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(dst));
@@ -1514,8 +1514,8 @@ static __forceinline void packed_pix_add_c(BYTE* dst, const BYTE* alpha, int w, 
     DWORD c_r = (color&0x00ff0000);
     DWORD c_g = (color&0x0000ff00);
     DWORD c_b = (color&0x000000ff);
-    const BYTE *alpha_end = alpha + w;
-    DWORD * dst_w = reinterpret_cast<DWORD*>(dst);
+    const BYTE* alpha_end = alpha + w;
+    DWORD*  dst_w = reinterpret_cast<DWORD*>(dst);
     for ( ; alpha<alpha_end; alpha++, dst_w++ )
     {
         DWORD d_a = ((*dst_w&0xff000000)>>24);
@@ -1568,8 +1568,8 @@ static __forceinline void packed_pix_add_sse2(BYTE* dst, const BYTE* alpha, int 
 
     __m128i ones = _mm_set1_epi16(0x1);
 
-    const BYTE *alpha_end0 = alpha + (w&~15);
-    const BYTE *alpha_end = alpha + w;
+    const BYTE* alpha_end0 = alpha + (w&~15);
+    const BYTE* alpha_end = alpha + w;
     for ( ; alpha<alpha_end0; alpha+=16, dst+=16*4 )
     {
         __m128i a  = _mm_loadu_si128(reinterpret_cast<const __m128i*>(alpha));
@@ -1601,7 +1601,7 @@ static __forceinline void packed_pix_add_sse2(BYTE* dst, const BYTE* alpha, int 
         _mm_storeu_si128(reinterpret_cast<__m128i*>(dst+32), d3);
         _mm_storeu_si128(reinterpret_cast<__m128i*>(dst+48), d4);
     }
-    DWORD * dst_w = reinterpret_cast<DWORD*>(dst);
+    DWORD*  dst_w = reinterpret_cast<DWORD*>(dst);
     for ( ; alpha<alpha_end; alpha++, dst_w++ )
     {
         int a = *alpha + 1;
@@ -1971,7 +1971,7 @@ SharedPtrByte Rasterizer::CompositeAlphaMask(const SharedPtrOverlay& overlay, co
     else
     {
         int last_x = xo;
-        const DWORD *sw = switchpts;
+        const DWORD* sw = switchpts;
         while( last_x<w+xo )
         {   
             byte alpha = sw[0]>>24; 
@@ -1995,7 +1995,7 @@ SharedPtrByte Rasterizer::CompositeAlphaMask(const SharedPtrOverlay& overlay, co
 
 ///////////////////////////////////////////////////////////////////////////
 
-typedef void (*DrawSingleColorPackPixFunc)(      DWORD *dst,
+typedef void (*DrawSingleColorPackPixFunc)(      DWORD* dst,
                                            const BYTE  *src, 
                                            DWORD        color, 
                                            int          w, 
@@ -2003,7 +2003,7 @@ typedef void (*DrawSingleColorPackPixFunc)(      DWORD *dst,
                                            int          src_pitch,
                                            int          dst_pitch);
 template<PixLineMixFunc pixmix_line>
-void DrawSingleColorPackPix(      DWORD *dst,
+void DrawSingleColorPackPix(      DWORD* dst,
                             const BYTE  *src, 
                             DWORD        color, 
                             int          w, 
@@ -2022,18 +2022,18 @@ void DrawSingleColorPackPix(      DWORD *dst,
 
 ///////////////////////////////////////////////////////////////////////////
 
-typedef void (*DrawMultiColorPackPixFunc)(     DWORD *dst,
+typedef void (*DrawMultiColorPackPixFunc)(     DWORD* dst,
                                          const BYTE  *src, 
-                                         const DWORD *switchpts, 
+                                         const DWORD* switchpts, 
                                          int          xo,
                                          int          w, 
                                          int          h,
                                          int          src_pitch,
                                          int          dst_pitch);
 template<PixMixFunc pixmix>
-void DrawMultiColorPackPix(     DWORD *dst,
+void DrawMultiColorPackPix(     DWORD* dst,
                           const BYTE  *src, 
-                          const DWORD *switchpts, 
+                          const DWORD* switchpts, 
                           int          xo, /*fix me: remove this parameter*/
                           int          w, 
                           int          h,
@@ -2043,14 +2043,14 @@ void DrawMultiColorPackPix(     DWORD *dst,
     DWORD color = switchpts[0];
     while(h--)
     {
-        const DWORD *sw = switchpts;
+        const DWORD* sw = switchpts;
         for(int wt=0; wt<w; ++wt)
         {
             if(wt+xo >= sw[1]) {while(wt+xo >= sw[1]) sw += 2; color = sw[-2];}
             pixmix(&dst[wt], color, src[wt]);
         }
         src += src_pitch;
-        dst = (DWORD *)((BYTE *)dst + dst_pitch);
+        dst = (DWORD*)((BYTE*)dst + dst_pitch);
     }
 }
 
@@ -2155,7 +2155,7 @@ void Rasterizer::Draw(XyBitmap* bitmap, SharedPtrOverlay overlay, const CRect& c
         unsigned char* dst_U = bitmap->plans[2] + dst_offset;
         unsigned char* dst_V = bitmap->plans[3] + dst_offset;
 
-        const DWORD *sw = switchpts;
+        const DWORD* sw = switchpts;
         int last_x = xo;
         color = sw[0];
         while(last_x<w+xo)
@@ -2204,7 +2204,7 @@ void Rasterizer::FillSolidRect(SubPicDesc& spd, int x, int y, int nWidth, int nH
     {
     case 0*DM::AYUV_PLANAR :
     {
-        BYTE *dst = ((BYTE*)spd.bits + spd.pitch * y) + x*4;
+        BYTE* dst = ((BYTE*)spd.bits + spd.pitch * y) + x*4;
         for (int wy=y; wy<y+nHeight; wy++) {
             pix_line_mix[fSSE2](dst, argb>>24, nWidth, argb);
             dst += spd.pitch;
@@ -2234,7 +2234,7 @@ typedef void (*MixLineFunc)(BYTE* dst, const BYTE* alpha, int w, DWORD color);
 typedef void (*DoAdditionDrawFunc)(BYTE* dst, const BYTE* src, DWORD color, int w, int h, int src_pitch, int dst_pitch);
 typedef void (*DoAdditionDrawMultiColorFunc)(      BYTE  *dst, 
                                              const BYTE  *src, 
-                                             const DWORD *switchpts, 
+                                             const DWORD* switchpts, 
                                              int          w, 
                                              int          h,
                                              int          src_pitch,
@@ -2254,7 +2254,7 @@ void DoAdditionDraw(BYTE* dst, const BYTE* src, DWORD color, int w, int h, int s
 template<MixLineFunc mix_line_func>
 void DoAdditionDrawMultiColor(      BYTE  *dst, 
                               const BYTE  *src, 
-                              const DWORD *switchpts, 
+                              const DWORD* switchpts, 
                               int          w, 
                               int          h,
                               int          src_pitch,
@@ -2263,9 +2263,9 @@ void DoAdditionDrawMultiColor(      BYTE  *dst,
     ASSERT(w>=0);
     while(h--)
     {
-        const DWORD *sw = switchpts;
-        DWORD *dst1 = (DWORD *)dst;
-        const BYTE *src1 = src;
+        const DWORD* sw = switchpts;
+        DWORD* dst1 = (DWORD*)dst;
+        const BYTE* src1 = src;
         DWORD last_x = switchpts[1];
         while(last_x<(DWORD)w)
         {
@@ -2857,8 +2857,8 @@ void FillAlphaMashBorderMasked_sse2(       BYTE* dst        ,
 
 void Overlay::FillAlphaMash( byte* outputAlphaMask, bool fBody, bool fBorder, int x, int y, int w, int h, const byte* pAlphaMask, int pitch, DWORD color_alpha)
 {
-    const BYTE * body = mBody.get();
-    const BYTE * border = mBorder.get();
+    const BYTE*  body = mBody.get();
+    const BYTE*  border = mBorder.get();
     body   = body  !=NULL ? body   + y*mOverlayPitch + x: NULL;
     border = border!=NULL ? border + y*mOverlayPitch + x: NULL;
     byte* dst = outputAlphaMask + y*mOverlayPitch + x;
@@ -3499,7 +3499,7 @@ bool ScanLineData2::CreateWidenedRegion(int rx, int ry)
 {
     if(rx < 0) rx = 0;
     if(ry < 0) ry = 0;
-    mWideBorder = max(rx,ry);
+    mWideBorder = _MAX(rx,ry);
     mWideOutline.clear();
 
     const tSpanBuffer& out_line = m_scan_line_data->mOutline;
