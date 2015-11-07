@@ -178,11 +178,6 @@ public:
     int mOverlayWidth, mOverlayHeight, mOverlayPitch;
 
     bool mfWideOutlineEmpty;//specially for blur
-private:
-    void _DoFillAlphaMash(byte* outputAlphaMask, const byte* pBody, const byte* pBorder,
-        int x, int y, int w, int h,
-        const byte* pAlphaMask, int pitch, DWORD color_alpha);
-    void _DoFillAlphaMash_c(byte* outputAlphaMask, const byte* pBody, const byte* pBorder, int x, int y, int w, int h, const byte* pAlphaMask, int pitch, DWORD color_alpha );
 };
 
 typedef ::boost::shared_ptr<Overlay> SharedPtrOverlay;
@@ -203,7 +198,7 @@ class Rasterizer
 {
 private:
     typedef unsigned char byte;
-    
+
     struct DM
     {
         enum
@@ -220,7 +215,7 @@ public:
 public:
 
     static bool Rasterize(const ScanLineData2& scan_line_data2, int xsub, int ysub, SharedPtrOverlay overlay);
-    
+
     static bool IsItReallyBlur(float be_strength, double gaussian_blur_strength);
     static bool OldFixedPointBlur(const Overlay& input_overlay, float be_strength, double gaussian_blur_strength, 
         double target_scale_x, double target_scale_y, SharedPtrOverlay output_overlay);
@@ -246,8 +241,17 @@ public:
         byte* s_base, 
         int xsub, int ysub, 
         const DWORD* switchpts, bool fBody, bool fBorder);
-		
-	static void FillSolidRect(SubPicDesc& spd, int x, int y, int nWidth, int nHeight, DWORD lColor);
-	
+
+    static void FillSolidRect(SubPicDesc& spd, int x, int y, int nWidth, int nHeight, DWORD lColor);
+
+    static void AdditionDraw(XyBitmap         *bitmap   , 
+                             SharedPtrOverlay  overlay  , 
+                             const CRect      &clipRect , 
+                             byte             *s_base   , 
+                             int               xsub     ,
+                             int               ysub     ,
+                             const DWORD      *switchpts, 
+                             bool              fBody    , 
+                             bool              fBorder);
 };
 
