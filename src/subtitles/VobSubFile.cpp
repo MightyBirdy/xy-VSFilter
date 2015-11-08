@@ -1076,7 +1076,7 @@ BYTE* CVobSubFile::GetPacket(size_t idx, size_t& packetSize, size_t& dataSize, s
         packetSize  = (buff[buff[0x16] + 0x18] << 8) + buff[buff[0x16] + 0x19];
 		dataSize = (buff[buff[0x16] + 0x1a] << 8) + buff[buff[0x16] + 0x1b];
 
-		ret = new BYTE[packetSize ];
+		ret = new BYTE[packetSize];
 		if(!ret) break;
 
 		size_t i = 0, sizeLeft = packetSize ;
