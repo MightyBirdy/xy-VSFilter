@@ -11,3 +11,4 @@
 ipch
 /src/filters/BaseClasses/*.asm
 /src/filters/transform/VSFilter/*.asm
+/src/filters/transform/vsfilter/version_in.h

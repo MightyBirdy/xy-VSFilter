@@ -3,6 +3,26 @@
 
 #include "version_in.h"
 
+#ifndef XY_VSFILTER_VERSION_MAJOR
+#define XY_VSFILTER_VERSION_MAJOR 3
+#endif
+
+#ifndef XY_VSFILTER_VERSION_MINOR
+#define XY_VSFILTER_VERSION_MINOR 0
+#endif
+
+#ifndef XY_VSFILTER_VERSION_PATCH
+#define XY_VSFILTER_VERSION_PATCH 0
+#endif
+
+#ifndef XY_VSFILTER_VERSION_COMMIT
+#define XY_VSFILTER_VERSION_COMMIT 208
+#endif
+
+#ifndef XY_VSFILTER_VERSION_COMMIT_SHA1
+#define XY_VSFILTER_VERSION_COMMIT_SHA1 ""
+#endif
+
 #define XY_VAR_2_STR(x) #x
 #define XY_VAR_2_STR2(x) XY_VAR_2_STR(x)
 
