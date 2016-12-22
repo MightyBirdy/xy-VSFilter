@@ -7,6 +7,7 @@
 #include <boost/smart_ptr.hpp>
 #include <afx.h>
 
+
 #include "mru_cache.h"
 
 template<>

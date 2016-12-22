@@ -17,6 +17,8 @@
 #include <Mfidl.h>
 #include <evr.h>
 
+#include "../../../overlay/overlay_func.h"
+
 #if ENABLE_XY_LOG_RENDERER_REQUEST
 #  define TRACE_RENDERER_REQUEST(msg) XY_LOG_TRACE(msg)
 #  define TRACE_RENDERER_REQUEST_TIMING(msg) XY_AUTO_TIMING(msg)
@@ -1178,6 +1180,7 @@ STDMETHODIMP XySubFilter::RequestFrame( REFERENCE_TIME start, REFERENCE_TIME sto
 
     HRESULT hr;
     CComPtr<IXySubRenderFrame> sub_render_frame;
+	CComPtr<IXySubRenderFrame> sub_render_frame2;
     {
         CAutoLock cAutoLock(&m_csFilter);
 
@@ -1197,6 +1200,7 @@ STDMETHODIMP XySubFilter::RequestFrame( REFERENCE_TIME start, REFERENCE_TIME sto
         if(m_sub_provider)
         {
             hr = m_sub_provider->RequestFrame(&sub_render_frame, now);
+			m_sub_provider->RequestFrame(&sub_render_frame2, now);
             if (FAILED(hr))
             {
                 XY_LOG_ERROR("Failed to RequestFrame."<<XY_LOG_VAR_2_STR(hr));
@@ -1245,7 +1249,8 @@ STDMETHODIMP XySubFilter::RequestFrame( REFERENCE_TIME start, REFERENCE_TIME sto
     CAutoLock cAutoLock(&m_csConsumer);
     //fix me: print osd message
     TRACE_RENDERER_REQUEST("Returnning "<<XY_LOG_VAR_2_STR(hr)<<XY_LOG_VAR_2_STR(sub_render_frame));
-    hr =  m_consumer->DeliverFrame(start, stop, context, sub_render_frame);
+	hr = m_consumer->DeliverFrame(start, stop, context, sub_render_frame);
+	overlay_send_frame(sub_render_frame2);
     return hr;
 }
 
@@ -1881,7 +1886,7 @@ void XySubFilter::InvalidateSubtitle( REFERENCE_TIME rtInvalidate /*= -1*/, DWOR
         {
             if (m_last_requested>rtInvalidate)
             {
-                ASSERT(0);
+                //ASSERT(0);
                 XY_LOG_ERROR("New subtitle samples received after a request.");
             }
             m_sub_provider->Invalidate(rtInvalidate);

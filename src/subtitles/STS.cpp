@@ -2619,6 +2619,7 @@ static int intcomp(const void* i1, const void* i2)
 
 void CSimpleTextSubtitle::CreateSegments()
 {
+
     m_segments.RemoveAll();
 
     if(m_entries.GetCount()>0)

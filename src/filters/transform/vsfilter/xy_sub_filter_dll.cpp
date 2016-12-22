@@ -29,6 +29,8 @@
 #include <initguid.h>
 #include "..\..\..\..\include\moreuuids.h"
 
+#include "../../../overlay/overlay_func.h"
+
 const AMOVIESETUP_MEDIATYPE sudPinTypesIn[] =
 {
     {&MEDIATYPE_Text, &MEDIASUBTYPE_None},
@@ -92,8 +94,8 @@ STDAPI DllUnregisterServer()
 void CALLBACK XySubFilterConfiguration(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
 {
     if(FAILED(::CoInitialize(0))) return;
-
-    CComPtr<IBaseFilter> pFilter;
+	
+	CComPtr<IBaseFilter> pFilter;
     CComQIPtr<ISpecifyPropertyPages> pSpecify;
 
     if(SUCCEEDED(pFilter.CoCreateInstance(__uuidof(XySubFilter))) && (pSpecify = pFilter))
