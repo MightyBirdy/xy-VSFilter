@@ -50,11 +50,6 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ClCompile>
-      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
-      <AdditionalOptions>/Qfast_transcendentals %(AdditionalOptions)</AdditionalOptions>
-      <OpenMPSupport>true</OpenMPSupport>
-    </ClCompile>
     <Lib>
       <AdditionalDependencies>$(SolutionDir)bin\libacof64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
