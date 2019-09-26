@@ -3375,18 +3375,20 @@ STDMETHODIMP CRenderedTextSubtitle::RenderEx( IXySubRenderFrame**subRenderFrame,
         return hr;
     }
 
-    if (m_movable)
+    if (!m_simple)
     {
+        bool newMovable = true;
         POSITION pos=sub2List.GetHeadPosition();
         while ( pos!=NULL )
         {
             const CSubtitle2& sub2 = sub2List.GetNext(pos);
-            if (sub2.s->m_hard_position_level >= POS_LVL_NONE)
+            if (sub2.s->m_hard_position_level > POS_LVL_NONE)
             {
-              m_movable = false;
+              newMovable = false;
               break;
             }
         }
+        m_movable = newMovable;
     }
 
     TRACE_RENDERER_REQUEST("Begin build draw item tree");
@@ -3590,6 +3592,11 @@ STDMETHODIMP_(bool) CRenderedTextSubtitle::IsColorTypeSupported( int type )
 STDMETHODIMP_(bool) CRenderedTextSubtitle::IsMovable()
 {
     return m_movable;
+}
+
+STDMETHODIMP_(bool) CRenderedTextSubtitle::IsSimple()
+{
+    return m_simple;
 }
 
 STDMETHODIMP CRenderedTextSubtitle::Lock()

@@ -571,6 +571,14 @@ STDMETHODIMP XySubFilter::XySetBool(unsigned field, bool      value)
             return XyOptionsImpl::XySetBool(field, value);
         }
         break;
+    case BOOL_ALLOW_MOVING:
+        {
+            CAutoLock cAutolock1(&m_csFilter);
+            CRenderedTextSubtitle * rts = dynamic_cast<CRenderedTextSubtitle*>(m_curSubStream);
+            if (rts)
+                m_xy_bool_opt[BOOL_IS_MOVABLE] = ((rts->IsMovable()) && ((rts->IsSimple()) || (value)));
+        }
+        break;
     }
     return DirectVobSubImpl::XySetBool(field, value);
 }
@@ -1234,12 +1242,10 @@ STDMETHODIMP XySubFilter::RequestFrame( REFERENCE_TIME start, REFERENCE_TIME sto
                 //fix me:
                 ASSERT(0);
             }
-            if (m_xy_bool_opt[BOOL_IS_MOVABLE])
-            {
-              CRenderedTextSubtitle * rts = dynamic_cast<CRenderedTextSubtitle*>(m_curSubStream);
-              if ((rts) && (!rts->IsMovable()))
-                m_xy_bool_opt[BOOL_IS_MOVABLE] = false;
-            }
+
+            CRenderedTextSubtitle * rts = dynamic_cast<CRenderedTextSubtitle*>(m_curSubStream);
+            m_xy_bool_opt[BOOL_IS_MOVABLE] = (!rts) || ((rts->IsMovable()) && ((rts->IsSimple()) || (m_xy_bool_opt[BOOL_ALLOW_MOVING])));
+
         }
     }
     CAutoLock cAutoLock(&m_csConsumer);
@@ -1307,6 +1313,10 @@ void XySubFilter::SetYuvMatrix()
                 {
                     yuv_matrix = ColorConvTable::BT709;
                 }
+                else if (m_xy_str_opt[STRING_CONSUMER_YUV_MATRIX].Right(4).CompareNoCase(L"2020")==0)
+                {
+                    yuv_matrix = ColorConvTable::BT2020;
+                }
                 else
                 {
                     XY_LOG_WARN(L"Can NOT get useful YUV range from consumer:"<<m_xy_str_opt[STRING_CONSUMER_YUV_MATRIX].GetString());
@@ -1325,6 +1335,9 @@ void XySubFilter::SetYuvMatrix()
             case DirectVobSubImpl::BT_709:
                 yuv_matrix = ColorConvTable::BT709;
                 break;
+            case DirectVobSubImpl::BT_2020:
+                yuv_matrix = ColorConvTable::BT2020;
+                break;
             case DirectVobSubImpl::GUESS:
             default:
                 if (m_xy_str_opt[STRING_CONSUMER_YUV_MATRIX].Right(3).CompareNoCase(L"601")==0)
@@ -1334,6 +1347,10 @@ void XySubFilter::SetYuvMatrix()
                 else if (m_xy_str_opt[STRING_CONSUMER_YUV_MATRIX].Right(3).CompareNoCase(L"709")==0)
                 {
                     yuv_matrix = ColorConvTable::BT709;
+                }
+                else if (m_xy_str_opt[STRING_CONSUMER_YUV_MATRIX].Right(4).CompareNoCase(L"2020")==0)
+                {
+                    yuv_matrix = ColorConvTable::BT2020;
                 }
                 else
                 {
@@ -1403,6 +1420,9 @@ void XySubFilter::SetYuvMatrix()
         else if (yuv_matrix==ColorConvTable::BT709) {
             m_xy_str_opt[STRING_YUV_MATRIX] += L".709";
         }
+        else if (yuv_matrix==ColorConvTable::BT2020) {
+            m_xy_str_opt[STRING_YUV_MATRIX] += L".2020";
+        }
         else {
             XY_LOG_WARN("This is unexpected."<<XY_LOG_VAR_2_STR(yuv_matrix));
             m_xy_str_opt[STRING_YUV_MATRIX] = L"None";
@@ -1445,6 +1465,10 @@ void XySubFilter::SetYuvMatrix()
         {
             m_xy_str_opt[STRING_YUV_MATRIX] += L"709";
         }
+        else if ( m_xy_str_opt[STRING_PGS_YUV_MATRIX].CompareNoCase(_T("BT2020"))==0 )
+        {
+            m_xy_str_opt[STRING_YUV_MATRIX] += L"2020";
+        }
         else
         {
             if (m_xy_str_opt[STRING_CONSUMER_YUV_MATRIX].Right(3).CompareNoCase(L"601")==0)
@@ -1454,6 +1478,10 @@ void XySubFilter::SetYuvMatrix()
             else if (m_xy_str_opt[STRING_CONSUMER_YUV_MATRIX].Right(3).CompareNoCase(L"709")==0)
             {
                 m_xy_str_opt[STRING_YUV_MATRIX] += L"709";
+            }
+            else if (m_xy_str_opt[STRING_CONSUMER_YUV_MATRIX].Right(4).CompareNoCase(L"2020")==0)
+            {
+                m_xy_str_opt[STRING_YUV_MATRIX] += L"2020";
             }
             else
             {
@@ -1731,6 +1759,9 @@ void XySubFilter::SetSubtitle( ISubStream* pSubStream, bool fApplyDefStyle /*= t
             case CSimpleTextSubtitle::YCbCrMatrix_BT709:
                 m_video_yuv_matrix_decided_by_sub = ColorConvTable::BT709;
                 break;
+            case CSimpleTextSubtitle::YCbCrMatrix_BT2020:
+                m_video_yuv_matrix_decided_by_sub = ColorConvTable::BT2020;
+                break;
             default:
                 m_video_yuv_matrix_decided_by_sub = ColorConvTable::NONE;
                 break;
@@ -1750,7 +1781,7 @@ void XySubFilter::SetSubtitle( ISubStream* pSubStream, bool fApplyDefStyle /*= t
             pRTS->Deinit();
             playres = pRTS->m_dstScreenSize;
             m_xy_bool_opt[BOOL_IS_BITMAP] = false;
-            m_xy_bool_opt[BOOL_IS_MOVABLE] = pRTS->IsMovable();
+            m_xy_bool_opt[BOOL_IS_MOVABLE] = ((pRTS->IsMovable()) && ((pRTS->IsSimple()) || (m_xy_bool_opt[BOOL_ALLOW_MOVING])));
         }
         else if(clsid == __uuidof(HdmvSubtitleProvider) || clsid == __uuidof(SupFileSubtitleProvider))
         {
@@ -1788,6 +1819,10 @@ void XySubFilter::SetSubtitle( ISubStream* pSubStream, bool fApplyDefStyle /*= t
             {
                 color_type = CompositionObject::YUV_Rec709;
             }
+            else if ( m_xy_str_opt[STRING_PGS_YUV_MATRIX].CompareNoCase(_T("BT2020"))==0 )
+            {
+                color_type = CompositionObject::YUV_Rec2020;
+            }
             else
             {
                 if (m_xy_str_opt[STRING_CONSUMER_YUV_MATRIX].Right(3).CompareNoCase(L"601")==0)
@@ -1797,6 +1832,10 @@ void XySubFilter::SetSubtitle( ISubStream* pSubStream, bool fApplyDefStyle /*= t
                 else if (m_xy_str_opt[STRING_CONSUMER_YUV_MATRIX].Right(3).CompareNoCase(L"709")==0)
                 {
                     color_type = CompositionObject::YUV_Rec709;
+                }
+                else if (m_xy_str_opt[STRING_CONSUMER_YUV_MATRIX].Right(4).CompareNoCase(L"2020")==0)
+                {
+                    color_type = CompositionObject::YUV_Rec2020;
                 }
                 else
                 {

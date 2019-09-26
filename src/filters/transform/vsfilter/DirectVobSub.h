@@ -38,6 +38,7 @@ public:
         YuvMatrix_AUTO = 0
         ,BT_601
         ,BT_709
+        ,BT_2020
         ,GUESS
     };
     enum YuvRange
@@ -119,11 +120,11 @@ public:
 
     STDMETHODIMP get_FileName(WCHAR* fn);
     STDMETHODIMP put_FileName(WCHAR* fn);
-	STDMETHODIMP get_LanguageCount(int* nLangs);
-	STDMETHODIMP get_LanguageName(int iLanguage, WCHAR** ppName);
-	STDMETHODIMP get_SelectedLanguage(int* iSelected);
-	STDMETHODIMP put_SelectedLanguage(int iSelected);
-	STDMETHODIMP get_HideSubtitles(bool* fHideSubtitles);
+    STDMETHODIMP get_LanguageCount(int* nLangs);
+    STDMETHODIMP get_LanguageName(int iLanguage, WCHAR** ppName);
+    STDMETHODIMP get_SelectedLanguage(int* iSelected);
+    STDMETHODIMP put_SelectedLanguage(int iSelected);
+    STDMETHODIMP get_HideSubtitles(bool* fHideSubtitles);
     STDMETHODIMP put_HideSubtitles(bool fHideSubtitles);
     STDMETHODIMP get_PreBuffering(bool* fDoPreBuffering);
     STDMETHODIMP put_PreBuffering(bool fDoPreBuffering);

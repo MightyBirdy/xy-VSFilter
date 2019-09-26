@@ -168,6 +168,7 @@ protected:
     virtual void OnChanged() {}
 
 public:
+    bool           m_simple;
     CString        m_name;
     LCID           m_lcid;
     tmode          m_mode;
@@ -199,6 +200,7 @@ public:
     {
         YCbCrMatrix_BT601,
         YCbCrMatrix_BT709,
+        YCbCrMatrix_BT2020,
         YCbCrMatrix_AUTO
     };
     enum YCbCrRange
